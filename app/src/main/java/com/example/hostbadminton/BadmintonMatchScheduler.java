@@ -6,9 +6,6 @@ import java.util.List;
 
 public class BadmintonMatchScheduler {
 
-    /**
-     * Đánh giá và chọn cách chia 2 đội tối ưu nhất cho 4 người chơi
-     */
     public static MatchOption evaluateMatch(Player p1, Player p2, Player p3, Player p4, HistoryManager historyManager) {
         OptionTriple[] options = new OptionTriple[] {
                 createOption(p1, p2, p3, p4, historyManager),
@@ -55,7 +52,32 @@ public class BadmintonMatchScheduler {
         // Cân bằng giới tính
         int team1Males = (a1.getGender() == Gender.MALE ? 1 : 0) + (a2.getGender() == Gender.MALE ? 1 : 0);
         int team2Males = (b1.getGender() == Gender.MALE ? 1 : 0) + (b2.getGender() == Gender.MALE ? 1 : 0);
-        double genderDiff = Math.abs(team1Males - team2Males);
+
+        int totalMales = team1Males + team2Males;
+        double genderDiff = 0.0;
+
+        if (totalMales == 0 || totalMales == 4) {
+            genderDiff = 0.0;
+        } else if (totalMales == 2) {
+            if (team1Males == 1 && team2Males == 1) {
+                genderDiff = 0.0;
+            } else {
+                genderDiff = 50.0;
+            }
+        } else {
+            genderDiff = Math.abs(team1Males - team2Males) * 2.0;
+        }
+
+        // Ưu tiên ghép cặp nếu có Yêu cầu đánh cùng
+        double preferenceBonus = 0.0;
+        if ((a1.getPreferredTeammateId() != null && a1.getPreferredTeammateId().equals(a2.getId())) ||
+                (a2.getPreferredTeammateId() != null && a2.getPreferredTeammateId().equals(a1.getId()))) {
+            preferenceBonus += 100.0; // Thưởng điểm cực cao để xếp cặp này
+        }
+        if ((b1.getPreferredTeammateId() != null && b1.getPreferredTeammateId().equals(b2.getId())) ||
+                (b2.getPreferredTeammateId() != null && b2.getPreferredTeammateId().equals(b1.getId()))) {
+            preferenceBonus += 100.0;
+        }
 
         // Phạt lặp lại đồng đội (+10 điểm / lần) & đối thủ (+2 điểm / lần)
         int t1Repeats = historyManager.getTeammateCount(a1.getId(), a2.getId());
@@ -66,7 +88,7 @@ public class BadmintonMatchScheduler {
         int opp3 = historyManager.getOpponentCount(a2.getId(), b1.getId());
         int opp4 = historyManager.getOpponentCount(a2.getId(), b2.getId());
 
-        double historyPenalty = (t1Repeats + t2Repeats) * 10.0 + (opp1 + opp2 + opp3 + opp4) * 2.0;
+        double historyPenalty = (t1Repeats + t2Repeats) * 10.0 + (opp1 + opp2 + opp3 + opp4) * 2.0 - preferenceBonus;
 
         return new OptionTriple(team1, team2, skillDiff, genderDiff, historyPenalty);
     }
@@ -76,16 +98,16 @@ public class BadmintonMatchScheduler {
         int count = availablePlayers.size();
 
         if (count < 4) {
-            return result; // Không đủ 4 người
+            return result;
         }
 
         int numCourts = 1;
         if (count >= 17) {
-            numCourts = 3; // Nhóm từ 17 người trở lên -> Xếp 3 sân (12 người đánh)
+            numCourts = 3;
         } else if (count >= 9) {
-            numCourts = 2; // Nhóm từ 9 - 16 người -> Xếp 2 sân (8 người đánh)
+            numCourts = 2;
         } else {
-            numCourts = 1; // Nhóm từ 4 - 8 người -> Xếp 1 sân (4 người đánh)
+            numCourts = 1;
         }
 
         int totalNeeded = numCourts * 4;

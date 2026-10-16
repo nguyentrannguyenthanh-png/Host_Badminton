@@ -7,6 +7,7 @@ public class Player {
     private Gender gender;
     private int matchesPlayed;
     private boolean isResting;
+    private String preferredTeammateId; // ID người chơi muốn đánh cùng (nếu có)
 
     public Player(String id, String name, PlayerSkill skill, Gender gender) {
         this.id = id;
@@ -15,9 +16,9 @@ public class Player {
         this.gender = gender;
         this.matchesPlayed = 0;
         this.isResting = false;
+        this.preferredTeammateId = null;
     }
 
-    // Điều kiện được tham gia trận đấu (dưới 6 set và không xin nghỉ)
     public boolean canPlay() {
         return matchesPlayed < 6 && !isResting;
     }
@@ -39,4 +40,7 @@ public class Player {
 
     public boolean isResting() { return isResting; }
     public void setResting(boolean resting) { this.isResting = resting; }
+
+    public String getPreferredTeammateId() { return preferredTeammateId; }
+    public void setPreferredTeammateId(String preferredTeammateId) { this.preferredTeammateId = preferredTeammateId; }
 }

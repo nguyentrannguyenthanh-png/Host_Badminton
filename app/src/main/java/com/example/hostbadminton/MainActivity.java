@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         skillAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSkill.setAdapter(skillAdapter);
 
-        // Khởi tạo Adapter hiển thị danh sách người chơi (CÓ SỐ THỨ TỰ STT)
+        // Khởi tạo Adapter hiển thị danh sách người chơi (CÓ STT VÀ THẺ CẶP YÊU CẦU)
         playerAdapter = new ArrayAdapter<Player>(this, R.layout.item_player, R.id.tvPlayerInfo, playerList) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -72,8 +72,15 @@ public class MainActivity extends AppCompatActivity {
 
                 if (player != null) {
                     String statusText = player.isResting() ? " [ĐANG NGHỈ]" : "";
-                    int stt = position + 1; // Số thứ tự STT bắt đầu từ 1, 2, 3...
-                    tvInfo.setText(stt + ". " + player.getName() + " (" + player.getGender().getDisplayName() + " - " + player.getSkill().getDisplayName() + ")" + statusText);
+                    String prefText = "";
+                    if (player.getPreferredTeammateId() != null) {
+                        Player partner = getPlayerById(player.getPreferredTeammateId());
+                        if (partner != null) {
+                            prefText = " [Cặp: " + partner.getName() + "]";
+                        }
+                    }
+                    int stt = position + 1;
+                    tvInfo.setText(stt + ". " + player.getName() + " (" + player.getGender().getDisplayName() + " - " + player.getSkill().getDisplayName() + ")" + prefText + statusText);
                     tvCount.setText(player.getMatchesPlayed() + "/6 set");
                 }
                 return view;
@@ -81,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         };
         lvPlayers.setAdapter(playerAdapter);
 
-        // Sự kiện khi CHẠM vào 1 người chơi trong danh sách để SỬA / XEM LỊCH SỬ / TẠM NGHỈ / XÓA
+        // Sự kiện khi CHẠM vào 1 người chơi
         lvPlayers.setOnItemClickListener((parent, view, position, id) -> {
             Player player = playerList.get(position);
             showPlayerOptionsDialog(player, position);
@@ -106,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Đã thêm: " + name + " (" + selectedGender.getDisplayName() + ")", Toast.LENGTH_SHORT).show();
         });
 
-        // 🟢 SỰ KIỆN NÚT "LỊCH SỬ" - XEM TẤT CẢ CÁC SET ĐÃ XẾP
+        // Sự kiện Xem Lịch Sử
         btnViewHistory.setOnClickListener(v -> {
             List<HistoryManager.SetRecord> records = historyManager.getAllSetRecords();
             if (records.isEmpty()) {
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         });
 
-        // 🟠 SỰ KIỆN NÚT "LÀM MỚI" - KHỔI TẠO LẠI DỮ LIỆU/BUỔI CHƠI MỚI
+        // Sự kiện Làm mới
         btnReset.setOnClickListener(v -> {
             String[] resetOptions = {
                     "Bắt đầu buổi mới (Reset số set về 0 & xóa lịch sử)",
@@ -151,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
                             for (Player p : playerList) {
                                 p.setMatchesPlayed(0);
                                 p.setResting(false);
+                                p.setPreferredTeammateId(null);
                             }
                             historyManager.clearHistory();
                             tvMatchResult.setText("Trận đấu tiếp theo sẽ hiển thị ở đây...");
@@ -170,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Sự kiện Xếp trận tự động
         btnSuggestMatch.setOnClickListener(v -> {
-            // Lọc những người còn được chơi (dưới 6 set và không xin tạm nghỉ)
             List<Player> availablePlayers = new ArrayList<>();
             for (Player p : playerList) {
                 if (p.canPlay()) {
@@ -183,10 +190,8 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Sắp xếp ưu tiên người đánh ít trận nhất lên trước
             Collections.sort(availablePlayers, (p1, p2) -> Integer.compare(p1.getMatchesPlayed(), p2.getMatchesPlayed()));
 
-            // Gọi thuật toán xếp 1, 2 hoặc 3 sân
             List<MatchOption> matches = BadmintonMatchScheduler.suggestMatches(availablePlayers, historyManager);
 
             if (matches != null && !matches.isEmpty()) {
@@ -212,7 +217,6 @@ public class MainActivity extends AppCompatActivity {
                             .append(" | Cân bằng Nam/Nữ: ").append(match.getGenderDiff() == 0 ? "Tốt" : "Lệch " + (int)match.getGenderDiff())
                             .append(")\n\n");
 
-                    // Cập nhật số set và ghi nhận lịch sử ngay sau khi xếp trận
                     match.getTeam1().first.setMatchesPlayed(match.getTeam1().first.getMatchesPlayed() + 1);
                     match.getTeam1().second.setMatchesPlayed(match.getTeam1().second.getMatchesPlayed() + 1);
                     match.getTeam2().first.setMatchesPlayed(match.getTeam2().first.getMatchesPlayed() + 1);
@@ -221,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                     historyManager.recordMatch(courtNum, match.getTeam1(), match.getTeam2());
                 }
 
-                historyManager.nextRound(); // Tăng lượt đấu tiếp theo
+                historyManager.nextRound();
                 tvMatchResult.setText(sb.toString().trim());
                 playerAdapter.notifyDataSetChanged();
             } else {
@@ -230,10 +234,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private Player getPlayerById(String id) {
+        for (Player p : playerList) {
+            if (p.getId().equals(id)) return p;
+        }
+        return null;
+    }
+
     // Hộp thoại menu tùy chọn khi chạm vào 1 người chơi
     private void showPlayerOptionsDialog(Player player, int position) {
+        String reqOptionText = (player.getPreferredTeammateId() != null) ?
+                "Hủy yêu cầu ghép cặp đồng đội" : "Yêu cầu đánh cùng đồng đội...";
+
         String[] options = {
                 "Sửa thông tin",
+                reqOptionText,
                 "Xem lịch sử các set của " + player.getName(),
                 player.isResting() ? "Tiếp tục chơi" : "Xin tạm nghỉ",
                 "Xóa người chơi"
@@ -245,12 +260,23 @@ public class MainActivity extends AppCompatActivity {
                     if (which == 0) {
                         showEditPlayerDialog(player);
                     } else if (which == 1) {
-                        showPlayerSetHistoryDialog(player);
+                        if (player.getPreferredTeammateId() != null) {
+                            // Hủy yêu cầu ghép cặp
+                            Player partner = getPlayerById(player.getPreferredTeammateId());
+                            if (partner != null) partner.setPreferredTeammateId(null);
+                            player.setPreferredTeammateId(null);
+                            playerAdapter.notifyDataSetChanged();
+                            Toast.makeText(this, "Đã hủy yêu cầu ghép cặp.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            showSelectPartnerDialog(player);
+                        }
                     } else if (which == 2) {
+                        showPlayerSetHistoryDialog(player);
+                    } else if (which == 3) {
                         player.setResting(!player.isResting());
                         playerAdapter.notifyDataSetChanged();
                         Toast.makeText(this, player.getName() + (player.isResting() ? " đã tạm nghỉ." : " đã tiếp tục chơi."), Toast.LENGTH_SHORT).show();
-                    } else if (which == 3) {
+                    } else if (which == 4) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Xác nhận xóa")
                                 .setMessage("Bạn có chắc chắn muốn xóa " + player.getName() + " khỏi danh sách?")
@@ -266,7 +292,36 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Hộp thoại hiển thị lịch sử các set mà 1 người chơi cụ thể đã tham gia
+    // 🟢 HỘP THOẠI CHỌN ĐỒNG ĐỘI MUỐN GHÉP CẶP ĐÁNH CÙNG
+    private void showSelectPartnerDialog(Player player) {
+        List<Player> otherPlayers = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+
+        for (Player p : playerList) {
+            if (!p.getId().equals(player.getId())) {
+                otherPlayers.add(p);
+                names.add(p.getName() + " (" + p.getGender().getDisplayName() + ")");
+            }
+        }
+
+        if (otherPlayers.isEmpty()) {
+            Toast.makeText(this, "Chưa có người chơi khác để ghép cặp!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Chọn đồng đội muốn ghép cùng " + player.getName())
+                .setItems(names.toArray(new String[0]), (dialog, which) -> {
+                    Player partner = otherPlayers.get(which);
+                    player.setPreferredTeammateId(partner.getId());
+                    partner.setPreferredTeammateId(player.getId());
+                    playerAdapter.notifyDataSetChanged();
+                    Toast.makeText(this, "Đã ghi nhận yêu cầu ghép cặp: " + player.getName() + " & " + partner.getName(), Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
     private void showPlayerSetHistoryDialog(Player player) {
         List<HistoryManager.SetRecord> playerSets = historyManager.getSetRecordsForPlayer(player.getId());
         if (playerSets.isEmpty()) {
@@ -287,7 +342,6 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Hộp thoại sửa thông tin chi tiết người chơi
     private void showEditPlayerDialog(Player player) {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
