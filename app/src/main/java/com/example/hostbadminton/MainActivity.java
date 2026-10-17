@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         skillAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSkill.setAdapter(skillAdapter);
 
-        // Khởi tạo Adapter hiển thị danh sách người chơi (CÓ STT VÀ THẺ CẶP YÊU CẦU)
+        // Khởi tạo Adapter hiển thị danh sách người chơi
         playerAdapter = new ArrayAdapter<Player>(this, R.layout.item_player, R.id.tvPlayerInfo, playerList) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Đã thêm: " + name + " (" + selectedGender.getDisplayName() + ")", Toast.LENGTH_SHORT).show();
         });
 
-        // Sự kiện Xem Lịch Sử
+        // Sự kiện Xem Lịch Sử & Nhập Tỉ Số
         btnViewHistory.setOnClickListener(v -> {
             List<HistoryManager.SetRecord> records = historyManager.getAllSetRecords();
             if (records.isEmpty()) {
@@ -130,16 +130,8 @@ public class MainActivity extends AppCompatActivity {
                     .setTitle("Lịch Sử Tất Cả Các Set (" + records.size() + " set)")
                     .setMessage(historyText.toString().trim())
                     .setPositiveButton("Đóng", null)
-                    .setNeutralButton("Xóa Lịch Sử", (dialog, which) -> {
-                        new AlertDialog.Builder(this)
-                                .setTitle("Xác nhận")
-                                .setMessage("Bạn có chắc chắn muốn xóa toàn bộ lịch sử các set đấu?")
-                                .setPositiveButton("Xóa", (d, w) -> {
-                                    historyManager.clearHistory();
-                                    Toast.makeText(this, "Đã xóa lịch sử thi đấu.", Toast.LENGTH_SHORT).show();
-                                })
-                                .setNegativeButton("Hủy", null)
-                                .show();
+                    .setNeutralButton("Nhập Tỉ Số Trận", (dialog, which) -> {
+                        showScoreInputDialog();
                     })
                     .show();
         });
@@ -208,13 +200,13 @@ public class MainActivity extends AppCompatActivity {
                     int courtNum = i + 1;
 
                     sb.append("=== SÂN ").append(courtNum).append(" ===\n")
-                            .append("Đội 1: ").append(match.getTeam1().first.getName()).append(" (").append(match.getTeam1().first.getGender().getDisplayName()).append(") + ")
-                            .append(match.getTeam1().second.getName()).append(" (").append(match.getTeam1().second.getGender().getDisplayName()).append(")\n")
+                            .append("Đội 1: ").append(match.getTeam1().first.getName()).append(" (").append(match.getTeam1().first.getGender().getDisplayName()).append(" - ").append(match.getTeam1().first.getSkill().getDisplayName()).append(") + ")
+                            .append(match.getTeam1().second.getName()).append(" (").append(match.getTeam1().second.getGender().getDisplayName()).append(" - ").append(match.getTeam1().second.getSkill().getDisplayName()).append(")\n")
                             .append("VS\n")
-                            .append("Đội 2: ").append(match.getTeam2().first.getName()).append(" (").append(match.getTeam2().first.getGender().getDisplayName()).append(") + ")
-                            .append(match.getTeam2().second.getName()).append(" (").append(match.getTeam2().second.getGender().getDisplayName()).append(")\n")
-                            .append("(Chênh lệch điểm: ").append(match.getSkillDiff())
-                            .append(" | Cân bằng Nam/Nữ: ").append(match.getGenderDiff() == 0 ? "Tốt" : "Lệch " + (int)match.getGenderDiff())
+                            .append("Đội 2: ").append(match.getTeam2().first.getName()).append(" (").append(match.getTeam2().first.getGender().getDisplayName()).append(" - ").append(match.getTeam2().first.getSkill().getDisplayName()).append(") + ")
+                            .append(match.getTeam2().second.getName()).append(" (").append(match.getTeam2().second.getGender().getDisplayName()).append(" - ").append(match.getTeam2().second.getSkill().getDisplayName()).append(")\n")
+                            .append("(Lệch trình: ").append(String.format("%.2f", match.getSkillDiff()))
+                            .append(" | Nam/Nữ: ").append(match.getGenderDiff() == 0 ? "Tốt" : "Lệch " + (int)match.getGenderDiff())
                             .append(")\n\n");
 
                     match.getTeam1().first.setMatchesPlayed(match.getTeam1().first.getMatchesPlayed() + 1);
@@ -222,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                     match.getTeam2().first.setMatchesPlayed(match.getTeam2().first.getMatchesPlayed() + 1);
                     match.getTeam2().second.setMatchesPlayed(match.getTeam2().second.getMatchesPlayed() + 1);
 
-                    historyManager.recordMatch(courtNum, match.getTeam1(), match.getTeam2());
+                    historyManager.recordMatch(courtNum, match.getTeam1(), match.getTeam2(), match.getSkillDiff());
                 }
 
                 historyManager.nextRound();
@@ -241,7 +233,77 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    // Hộp thoại menu tùy chọn khi chạm vào 1 người chơi
+    // 🟢 HỘP THOẠI NHẬP TỈ SỐ CHO CÁC TRẬN ĐANG ĐÁNH
+    private void showScoreInputDialog() {
+        List<HistoryManager.SetRecord> allRecords = historyManager.getAllSetRecords();
+        if (allRecords.isEmpty()) return;
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 20);
+
+        List<EditText> inputs1 = new ArrayList<>();
+        List<EditText> inputs2 = new ArrayList<>();
+
+        for (int i = 0; i < allRecords.size(); i++) {
+            HistoryManager.SetRecord rec = allRecords.get(i);
+
+            TextView tvTitle = new TextView(this);
+            tvTitle.setText("Trận " + (i + 1) + " (Sân " + rec.getFormattedText().split("\n")[0] + "):");
+            tvTitle.setPadding(0, 20, 0, 10);
+            tvTitle.setTextSize(14);
+            layout.addView(tvTitle);
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+
+            EditText et1 = new EditText(this);
+            et1.setHint("Đội 1");
+            et1.setInputType(InputType.TYPE_CLASS_NUMBER);
+            if (rec.getScore1() != null) et1.setText(String.valueOf(rec.getScore1()));
+            LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            et1.setLayoutParams(p1);
+            row.addView(et1);
+            inputs1.add(et1);
+
+            TextView tvVs = new TextView(this);
+            tvVs.setText(" - ");
+            tvVs.setTextSize(16);
+            row.addView(tvVs);
+
+            EditText et2 = new EditText(this);
+            et2.setHint("Đội 2");
+            et2.setInputType(InputType.TYPE_CLASS_NUMBER);
+            if (rec.getScore2() != null) et2.setText(String.valueOf(rec.getScore2()));
+            LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            et2.setLayoutParams(p2);
+            row.addView(et2);
+            inputs2.add(et2);
+
+            layout.addView(row);
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Nhập Tỉ Số Các Set")
+                .setView(layout)
+                .setPositiveButton("Lưu Tỉ Số", (dialog, which) -> {
+                    for (int i = 0; i < allRecords.size(); i++) {
+                        String s1 = inputs1.get(i).getText().toString().trim();
+                        String s2 = inputs2.get(i).getText().toString().trim();
+                        if (!s1.isEmpty() && !s2.isEmpty()) {
+                            try {
+                                int sc1 = Integer.parseInt(s1);
+                                int sc2 = Integer.parseInt(s2);
+                                allRecords.get(i).setScore(sc1, sc2);
+                            } catch (NumberFormatException ignored) {}
+                        }
+                    }
+                    Toast.makeText(this, "Đã lưu tỉ số thành công!", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
     private void showPlayerOptionsDialog(Player player, int position) {
         String reqOptionText = (player.getPreferredTeammateId() != null) ?
                 "Hủy yêu cầu ghép cặp đồng đội" : "Yêu cầu đánh cùng đồng đội...";
@@ -261,7 +323,6 @@ public class MainActivity extends AppCompatActivity {
                         showEditPlayerDialog(player);
                     } else if (which == 1) {
                         if (player.getPreferredTeammateId() != null) {
-                            // Hủy yêu cầu ghép cặp
                             Player partner = getPlayerById(player.getPreferredTeammateId());
                             if (partner != null) partner.setPreferredTeammateId(null);
                             player.setPreferredTeammateId(null);
@@ -292,7 +353,6 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    // 🟢 HỘP THOẠI CHỌN ĐỒNG ĐỘI MUỐN GHÉP CẶP ĐÁNH CÙNG
     private void showSelectPartnerDialog(Player player) {
         List<Player> otherPlayers = new ArrayList<>();
         List<String> names = new ArrayList<>();

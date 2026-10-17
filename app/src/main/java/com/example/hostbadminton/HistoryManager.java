@@ -9,6 +9,7 @@ import java.util.Map;
 public class HistoryManager {
     private final Map<String, Integer> teammateMap = new HashMap<>();
     private final Map<String, Integer> opponentMap = new HashMap<>();
+    private final Map<String, Integer> sameGenderPairMap = new HashMap<>();
     private final List<SetRecord> setRecords = new ArrayList<>();
     private int currentSetRound = 1;
 
@@ -24,17 +25,26 @@ public class HistoryManager {
         return opponentMap.getOrDefault(getPairKey(id1, id2), 0);
     }
 
-    // Ghi nhận lịch sử sau khi kết thúc một trận đấu
-    public void recordMatch(int courtNum, PlayerPair team1, PlayerPair team2) {
-        // Ghi nhận đồng đội Đội 1
+    public int getSameGenderPairCount(String playerId) {
+        return sameGenderPairMap.getOrDefault(playerId, 0);
+    }
+
+    public SetRecord recordMatch(int courtNum, PlayerPair team1, PlayerPair team2, double skillDiff) {
         String t1Key = getPairKey(team1.first.getId(), team1.second.getId());
         teammateMap.put(t1Key, teammateMap.getOrDefault(t1Key, 0) + 1);
 
-        // Ghi nhận đồng đội Đội 2
         String t2Key = getPairKey(team2.first.getId(), team2.second.getId());
         teammateMap.put(t2Key, teammateMap.getOrDefault(t2Key, 0) + 1);
 
-        // Ghi nhận đối thủ (chéo giữa 2 đội)
+        if (team1.first.getGender() == team1.second.getGender()) {
+            sameGenderPairMap.put(team1.first.getId(), getSameGenderPairCount(team1.first.getId()) + 1);
+            sameGenderPairMap.put(team1.second.getId(), getSameGenderPairCount(team1.second.getId()) + 1);
+        }
+        if (team2.first.getGender() == team2.second.getGender()) {
+            sameGenderPairMap.put(team2.first.getId(), getSameGenderPairCount(team2.first.getId()) + 1);
+            sameGenderPairMap.put(team2.second.getId(), getSameGenderPairCount(team2.second.getId()) + 1);
+        }
+
         List<PlayerPair> crossPairs = Arrays.asList(
                 new PlayerPair(team1.first, team2.first),
                 new PlayerPair(team1.first, team2.second),
@@ -47,9 +57,9 @@ public class HistoryManager {
             opponentMap.put(key, opponentMap.getOrDefault(key, 0) + 1);
         }
 
-        // Lưu đối tượng SetRecord để tra cứu sau này
-        SetRecord record = new SetRecord(currentSetRound, courtNum, team1.first, team1.second, team2.first, team2.second);
+        SetRecord record = new SetRecord(currentSetRound, courtNum, team1.first, team1.second, team2.first, team2.second, skillDiff);
         setRecords.add(record);
+        return record;
     }
 
     public void nextRound() {
@@ -60,7 +70,6 @@ public class HistoryManager {
         return setRecords;
     }
 
-    // Lấy danh sách các Set mà 1 người chơi cụ thể đã tham gia
     public List<SetRecord> getSetRecordsForPlayer(String playerId) {
         List<SetRecord> result = new ArrayList<>();
         for (SetRecord record : setRecords) {
@@ -74,24 +83,36 @@ public class HistoryManager {
     public void clearHistory() {
         teammateMap.clear();
         opponentMap.clear();
+        sameGenderPairMap.clear();
         setRecords.clear();
         currentSetRound = 1;
     }
 
-    // Lớp phụ trợ gói thông tin 1 Set đấu
     public static class SetRecord {
         private final int roundNumber;
         private final int courtNumber;
         private final Player p1, p2, p3, p4;
+        private final double skillDiff;
+        private Integer score1 = null;
+        private Integer score2 = null;
 
-        public SetRecord(int roundNumber, int courtNumber, Player p1, Player p2, Player p3, Player p4) {
+        public SetRecord(int roundNumber, int courtNumber, Player p1, Player p2, Player p3, Player p4, double skillDiff) {
             this.roundNumber = roundNumber;
             this.courtNumber = courtNumber;
             this.p1 = p1;
             this.p2 = p2;
             this.p3 = p3;
             this.p4 = p4;
+            this.skillDiff = skillDiff;
         }
+
+        public void setScore(int score1, int score2) {
+            this.score1 = score1;
+            this.score2 = score2;
+        }
+
+        public Integer getScore1() { return score1; }
+        public Integer getScore2() { return score2; }
 
         public boolean containsPlayer(String playerId) {
             return p1.getId().equals(playerId) || p2.getId().equals(playerId) ||
@@ -99,14 +120,15 @@ public class HistoryManager {
         }
 
         public String getFormattedText() {
-            return "Lượt " + roundNumber + " - Sân " + courtNumber + ":\n" +
-                    "  Đội 1: " + p1.getName() + " (" + p1.getGender().getDisplayName() + ") + " + p2.getName() + " (" + p2.getGender().getDisplayName() + ")\n" +
+            String scoreText = (score1 != null && score2 != null) ? " [Tỉ số: " + score1 + " - " + score2 + "]" : "";
+            return "Lượt " + roundNumber + " - Sân " + courtNumber + scoreText + ":\n" +
+                    "  Đội 1: " + p1.getName() + " (" + p1.getGender().getDisplayName() + " - " + p1.getSkill().getDisplayName() + ") + " + p2.getName() + " (" + p2.getGender().getDisplayName() + " - " + p2.getSkill().getDisplayName() + ")\n" +
                     "  VS\n" +
-                    "  Đội 2: " + p3.getName() + " (" + p3.getGender().getDisplayName() + ") + " + p4.getName() + " (" + p4.getGender().getDisplayName() + ")";
+                    "  Đội 2: " + p3.getName() + " (" + p3.getGender().getDisplayName() + " - " + p3.getSkill().getDisplayName() + ") + " + p4.getName() + " (" + p4.getGender().getDisplayName() + " - " + p4.getSkill().getDisplayName() + ")\n" +
+                    "  (Lệch trình: " + String.format("%.2f", skillDiff) + ")";
         }
     }
 
-    // Lớp phụ trợ gói cặp 2 người chơi
     public static class PlayerPair {
         public Player first;
         public Player second;

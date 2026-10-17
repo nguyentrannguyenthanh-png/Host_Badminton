@@ -46,40 +46,44 @@ public class BadmintonMatchScheduler {
         HistoryManager.PlayerPair team1 = new HistoryManager.PlayerPair(a1, a2);
         HistoryManager.PlayerPair team2 = new HistoryManager.PlayerPair(b1, b2);
 
-        // Chênh lệch điểm trình độ
-        double skillDiff = Math.abs((a1.getSkill().getScore() + a2.getSkill().getScore()) - (b1.getSkill().getScore() + b2.getSkill().getScore()));
+        // 1. Chênh lệch điểm trình độ (trọng số 5.0)
+        double skillDiff = Math.abs((a1.getSkill().getScore() + a2.getSkill().getScore()) - (b1.getSkill().getScore() + b2.getSkill().getScore())) * 5.0;
 
-        // Cân bằng giới tính
+        // 2. Xoay vòng đa dạng thể loại trận
         int team1Males = (a1.getGender() == Gender.MALE ? 1 : 0) + (a2.getGender() == Gender.MALE ? 1 : 0);
         int team2Males = (b1.getGender() == Gender.MALE ? 1 : 0) + (b2.getGender() == Gender.MALE ? 1 : 0);
 
         int totalMales = team1Males + team2Males;
         double genderDiff = 0.0;
 
-        if (totalMales == 0 || totalMales == 4) {
-            genderDiff = 0.0;
-        } else if (totalMales == 2) {
+        if (totalMales == 2) {
             if (team1Males == 1 && team2Males == 1) {
                 genderDiff = 0.0;
             } else {
-                genderDiff = 50.0;
+                genderDiff = 35.0;
             }
+        } else if (totalMales == 0 || totalMales == 4) {
+            int sameGenderRepeats = historyManager.getSameGenderPairCount(a1.getId()) +
+                    historyManager.getSameGenderPairCount(a2.getId()) +
+                    historyManager.getSameGenderPairCount(b1.getId()) +
+                    historyManager.getSameGenderPairCount(b2.getId());
+            genderDiff = sameGenderRepeats * 4.0;
         } else {
-            genderDiff = Math.abs(team1Males - team2Males) * 2.0;
+            genderDiff = 8.0;
         }
 
-        // Ưu tiên ghép cặp nếu có Yêu cầu đánh cùng
+        // 3. Ưu tiên ghép cặp theo Yêu cầu
         double preferenceBonus = 0.0;
         if ((a1.getPreferredTeammateId() != null && a1.getPreferredTeammateId().equals(a2.getId())) ||
                 (a2.getPreferredTeammateId() != null && a2.getPreferredTeammateId().equals(a1.getId()))) {
-            preferenceBonus += 100.0; // Thưởng điểm cực cao để xếp cặp này
+            preferenceBonus += 150.0;
         }
         if ((b1.getPreferredTeammateId() != null && b1.getPreferredTeammateId().equals(b2.getId())) ||
                 (b2.getPreferredTeammateId() != null && b2.getPreferredTeammateId().equals(b1.getId()))) {
-            preferenceBonus += 100.0;
+            preferenceBonus += 150.0;
         }
 
-        // Phạt lặp lại đồng đội (+10 điểm / lần) & đối thủ (+2 điểm / lần)
+        // 4. Phạt lặp lại
         int t1Repeats = historyManager.getTeammateCount(a1.getId(), a2.getId());
         int t2Repeats = historyManager.getTeammateCount(b1.getId(), b2.getId());
 
@@ -88,7 +92,7 @@ public class BadmintonMatchScheduler {
         int opp3 = historyManager.getOpponentCount(a2.getId(), b1.getId());
         int opp4 = historyManager.getOpponentCount(a2.getId(), b2.getId());
 
-        double historyPenalty = (t1Repeats + t2Repeats) * 10.0 + (opp1 + opp2 + opp3 + opp4) * 2.0 - preferenceBonus;
+        double historyPenalty = (t1Repeats + t2Repeats) * 15.0 + (opp1 + opp2 + opp3 + opp4) * 3.0 - preferenceBonus;
 
         return new OptionTriple(team1, team2, skillDiff, genderDiff, historyPenalty);
     }
@@ -111,6 +115,11 @@ public class BadmintonMatchScheduler {
         }
 
         int totalNeeded = numCourts * 4;
+
+        if (count > totalNeeded) {
+            return findBestPlayerCombination(availablePlayers, numCourts, historyManager);
+        }
+
         List<Player> topPlayers = availablePlayers.subList(0, totalNeeded);
 
         if (numCourts == 1) {
@@ -123,6 +132,45 @@ public class BadmintonMatchScheduler {
         }
 
         return result;
+    }
+
+    private static List<MatchOption> findBestPlayerCombination(List<Player> availablePlayers, int numCourts, HistoryManager historyManager) {
+        int totalNeeded = numCourts * 4;
+        List<MatchOption> bestMatches = null;
+        double bestPenalty = Double.MAX_VALUE;
+
+        int minMatches = availablePlayers.get(0).getMatchesPlayed();
+        List<Player> candidatePool = new ArrayList<>();
+        for (Player p : availablePlayers) {
+            if (p.getMatchesPlayed() <= minMatches + 1) {
+                candidatePool.add(p);
+            }
+        }
+        if (candidatePool.size() < totalNeeded) {
+            candidatePool = availablePlayers.subList(0, Math.min(availablePlayers.size(), totalNeeded + 4));
+        }
+
+        if (numCourts == 1 && candidatePool.size() >= 4) {
+            for (int i = 0; i < candidatePool.size(); i++) {
+                for (int j = i + 1; j < candidatePool.size(); j++) {
+                    for (int k = j + 1; k < candidatePool.size(); k++) {
+                        for (int m = k + 1; m < candidatePool.size(); m++) {
+                            MatchOption match = evaluateMatch(candidatePool.get(i), candidatePool.get(j), candidatePool.get(k), candidatePool.get(m), historyManager);
+                            if (match != null && match.getTotalPenalty() < bestPenalty) {
+                                bestPenalty = match.getTotalPenalty();
+                                bestMatches = Arrays.asList(match);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (numCourts == 2 && candidatePool.size() >= 8) {
+            bestMatches = partitionTwoCourts(candidatePool.subList(0, 8), historyManager);
+        } else if (numCourts == 3 && candidatePool.size() >= 12) {
+            bestMatches = partitionThreeCourts(candidatePool.subList(0, 12), historyManager);
+        }
+
+        return bestMatches != null ? bestMatches : new ArrayList<>();
     }
 
     private static List<MatchOption> partitionTwoCourts(List<Player> players, HistoryManager historyManager) {
