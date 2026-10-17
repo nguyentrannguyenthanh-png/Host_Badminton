@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Host Badminton - Quản lý Sân Cầu</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Host Badminton">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f5f5f7; color: #1d1d1f; padding: 20px 16px; padding-top: calc(env(safe-area-inset-top) + 20px); max-width: 600px; margin: 0 auto; }
+        h1 { font-size: 20px; text-align: center; margin-bottom: 16px; color: #1d1d1f; }
+        .card { background: #ffffff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        input, select { width: 100%; padding: 12px; font-size: 15px; border: 1px solid #d2d2d7; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+        label { font-size: 12px; color: #666; margin-bottom: 4px; display: block; }
+        .row { display: flex; gap: 8px; }
+        .row select { flex: 1; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: white; transition: opacity 0.2s; }
+        button:active { opacity: 0.8; }
+        .btn-add { background-color: #5e5ce6; }
+        .btn-suggest { background-color: #34c759; flex: 2; }
+        .btn-history { background-color: #007aff; flex: 1; }
+        .btn-reset { background-color: #ff9500; flex: 1; }
+        .btn-reload { background-color: #8e8e93; flex: 1; }
+        .btn-row { display: flex; gap: 6px; margin-top: 10px; }
+        .result-box { background: #eef2f5; border-radius: 8px; padding: 12px; font-size: 14px; margin-top: 12px; min-height: 60px; }
+        .court-card { background: #ffffff; border: 1px solid #e5e5ea; border-radius: 8px; padding: 12px; margin-top: 10px; }
+        .court-title { font-weight: bold; color: #1d1d1f; margin-bottom: 6px; border-bottom: 1px solid #f0f0f0; padding-bottom: 4px; }
+        .skill-diff { font-size: 12px; color: #8e8e93; margin-top: 4px; font-style: italic; }
+        .score-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; background: #f9f9fb; padding: 8px; border-radius: 6px; }
+        .score-row input { margin-bottom: 0; text-align: center; font-weight: bold; }
+        .list-header { font-weight: bold; font-size: 16px; margin: 16px 0 8px 0; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); cursor: pointer; }
+        .player-info { font-size: 15px; }
+        .player-count { font-weight: bold; color: #007aff; font-size: 14px; }
+        .resting { color: #ff3b30; font-weight: bold; }
+        .pref-tag { color: #5e5ce6; font-weight: bold; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 14px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+        .modal-title { font-size: 17px; font-weight: bold; margin-bottom: 12px; text-align: center; }
+        .modal-btn { margin-top: 8px; background: #e5e5ea; color: #007aff; }
+        .modal-btn-danger { background: #ffe5e5; color: #ff3b30; }
+        .empty-msg { font-size: 14px; color: #8e8e93; font-style: italic; text-align: center; padding: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>Host Badminton - Quản lý Sân Cầu</h1>
+
+    <div class="card">
+        <input type="text" id="playerName" placeholder="Nhập tên người chơi">
+        <div class="row">
+            <select id="playerGender">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+            <select id="playerSkill">
+                <option value="0.0">Newbie</option>
+                <option value="0.25">Newbie biết luật</option>
+                <option value="0.5">Yếu</option>
+                <option value="1.0">Yếu +</option>
+                <option value="1.5">Trung bình yếu</option>
+                <option value="2.0">Trung bình -</option>
+                <option value="2.5">Trung bình</option>
+                <option value="3.0">Trung bình +</option>
+            </select>
+        </div>
+        <button class="btn-add" onclick="addPlayer()">Thêm người chơi</button>
+
+        <div class="btn-row">
+            <button class="btn-suggest" onclick="suggestMatches()">Xếp Trận Mới</button>
+            <button class="btn-history" onclick="viewHistory()">Lịch Sử</button>
+            <button class="btn-reset" onclick="resetData()">Làm Mới</button>
+            <button class="btn-reload" onclick="location.reload()">Tải Lại</button>
+        </div>
+
+        <div id="resultBox" class="result-box">Trận đấu tiếp theo sẽ hiển thị ở đây...</div>
+    </div>
+
+    <div class="list-header">Danh sách người chơi (Đã tham gia):</div>
+    <div id="playerList"></div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        let players = [];
+        let historyLogs = [];
+        let currentMatches = [];
+        let teammateMap = {};
+        let sameGenderMap = {};
+        let currentRound = 1;
+
+        window.onload = function() {
+            loadDatabase();
+            renderPlayers();
+            renderResultBox();
+        };
+
+        function loadDatabase() {
+            const savedPlayers = localStorage.getItem("host_badminton_players");
+            const savedHistory = localStorage.getItem("host_badminton_history");
+            const savedMatches = localStorage.getItem("host_badminton_current_matches");
+
+            if (savedPlayers) players = JSON.parse(savedPlayers);
+            else players = [];
+
+            if (savedHistory) historyLogs = JSON.parse(savedHistory);
+            if (savedMatches) currentMatches = JSON.parse(savedMatches);
+        }
+
+        function saveDatabase() {
+            localStorage.setItem("host_badminton_players", JSON.stringify(players));
+            localStorage.setItem("host_badminton_history", JSON.stringify(historyLogs));
+            localStorage.setItem("host_badminton_current_matches", JSON.stringify(currentMatches));
+        }
+
+        function addPlayer() {
+            const nameInput = document.getElementById("playerName");
+            const name = nameInput.value.trim();
+            if (!name) { alert("Vui lòng nhập tên người chơi!"); return; }
+            const gender = document.getElementById("playerGender").value;
+            const skillSelect = document.getElementById("playerSkill");
+            const skillScore = parseFloat(skillSelect.value);
+            const skillName = skillSelect.options[skillSelect.selectedIndex].text;
+
+            players.push({
+                id: Date.now().toString(),
+                name: name,
+                gender: gender,
+                skillName: skillName,
+                skillScore: skillScore,
+                matchesPlayed: 0,
+                isResting: false,
+                preferredTeammateId: null
+            });
+
+            nameInput.value = "";
+            saveDatabase();
+            renderPlayers();
+        }
+
+        function renderPlayers() {
+            const list = document.getElementById("playerList");
+            list.innerHTML = "";
+
+            if (players.length === 0) {
+                list.innerHTML = `<div class="empty-msg">Chưa có người chơi nào. Hãy nhập tên và bấm "Thêm người chơi"!</div>`;
+                return;
+            }
+
+            players.forEach((p, idx) => {
+                const item = document.createElement("div");
+                item.className = "player-item";
+                item.onclick = () => openPlayerOptions(idx);
+                const restingText = p.isResting ? ' <span class="resting">[ĐANG NGHỈ]</span>' : '';
+                let prefText = "";
+                if (p.preferredTeammateId) {
+                    const partner = players.find(x => x.id === p.preferredTeammateId);
+                    if (partner) prefText = ` <span class="pref-tag">[Cặp: ${partner.name}]</span>`;
+                }
+                item.innerHTML = `
+                    <div class="player-info">${idx + 1}. ${p.name} (${p.gender} - ${p.skillName})${prefText}${restingText}</div>
+                    <div class="player-count">${p.matchesPlayed}/6 set</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function openPlayerOptions(idx) {
+            const p = players[idx];
+            const partnerBtnText = p.preferredTeammateId ? "Hủy yêu cầu ghép cặp đồng đội" : "Yêu cầu đánh cùng đồng đội...";
+            showModal(`
+                <div class="modal-title">Quản lý: ${p.name} (${p.gender})</div>
+                <button class="modal-btn" onclick="editPlayer(${idx})">Sửa thông tin</button>
+                <button class="modal-btn" onclick="togglePartnerRequest(${idx})">${partnerBtnText}</button>
+                <button class="modal-btn" onclick="viewPlayerHistory('${p.id}')">Xem lịch sử các set</button>
+                <button class="modal-btn" onclick="toggleRest(${idx})">${p.isResting ? 'Tiếp tục chơi' : 'Xin tạm nghỉ'}</button>
+                <button class="modal-btn modal-btn-danger" onclick="deletePlayer(${idx})">Xóa người chơi</button>
+                <button class="modal-btn" style="background:#8e8e93; color:white; margin-top:12px;" onclick="closeModal()">Hủy</button>
+            `);
+        }
+
+        function togglePartnerRequest(idx) {
+            const p = players[idx];
+            if (p.preferredTeammateId) {
+                const partner = players.find(x => x.id === p.preferredTeammateId);
+                if (partner) partner.preferredTeammateId = null;
+                p.preferredTeammateId = null;
+                closeModal();
+                saveDatabase();
+                renderPlayers();
+            } else {
+                let optionsHtml = `<div class="modal-title">Chọn đồng đội muốn ghép cùng ${p.name}</div>`;
+                players.forEach((other, oIdx) => {
+                    if (other.id !== p.id) {
+                        optionsHtml += `<button class="modal-btn" onclick="setPartner(${idx}, ${oIdx})">${other.name} (${other.gender})</button>`;
+                    }
+                });
+                optionsHtml += `<button class="modal-btn" style="background:#8e8e93; color:white; margin-top:12px;" onclick="closeModal()">Hủy</button>`;
+                showModal(optionsHtml);
+            }
+        }
+
+        function setPartner(pIdx, partnerIdx) {
+            players[pIdx].preferredTeammateId = players[partnerIdx].id;
+            players[partnerIdx].preferredTeammateId = players[pIdx].id;
+            closeModal();
+            saveDatabase();
+            renderPlayers();
+        }
+
+        function toggleRest(idx) {
+            players[idx].isResting = !players[idx].isResting;
+            closeModal();
+            saveDatabase();
+            renderPlayers();
+        }
+
+        function deletePlayer(idx) {
+            if (confirm("Bạn có chắc chắn muốn xóa " + players[idx].name + "?")) {
+                players.splice(idx, 1);
+                closeModal();
+                saveDatabase();
+                renderPlayers();
+            }
+        }
+
+        function editPlayer(idx) {
+            const p = players[idx];
+            const skills = [
+                { score: 0.0, name: "Newbie" },
+                { score: 0.25, name: "Newbie biết luật" },
+                { score: 0.5, name: "Yếu" },
+                { score: 1.0, name: "Yếu +" },
+                { score: 1.5, name: "Trung bình yếu" },
+                { score: 2.0, name: "Trung bình -" },
+                { score: 2.5, name: "Trung bình" },
+                { score: 3.0, name: "Trung bình +" }
+            ];
+
+            let skillOptions = "";
+            skills.forEach(s => {
+                const selected = p.skillName === s.name ? "selected" : "";
+                skillOptions += `<option value="${s.score}" ${selected}>${s.name}</option>`;
+            });
+
+            showModal(`
+                <div class="modal-title">Sửa thông tin: ${p.name}</div>
+                <label>Tên người chơi:</label>
+                <input type="text" id="editName" value="${p.name}">
+                <label>Giới tính:</label>
+                <select id="editGender">
+                    <option value="Nam" ${p.gender === 'Nam' ? 'selected' : ''}>Nam</option>
+                    <option value="Nữ" ${p.gender === 'Nữ' ? 'selected' : ''}>Nữ</option>
+                </select>
+                <label>Trình độ:</label>
+                <select id="editSkill">${skillOptions}</select>
+                <label>Số set đã đánh:</label>
+                <input type="number" id="editMatches" value="${p.matchesPlayed}">
+                <button class="modal-btn" style="background:#34c759; color:white; margin-top:10px;" onclick="savePlayerEdit(${idx})">Lưu</button>
+                <button class="modal-btn" onclick="closeModal()">Hủy</button>
+            `);
+        }
+
+        function savePlayerEdit(idx) {
+            const newName = document.getElementById("editName").value.trim();
+            if (!newName) return;
+            const skillSelect = document.getElementById("editSkill");
+            const skillScore = parseFloat(skillSelect.value);
+            const skillName = skillSelect.options[skillSelect.selectedIndex].text;
+
+            players[idx].name = newName;
+            players[idx].gender = document.getElementById("editGender").value;
+            players[idx].skillScore = skillScore;
+            players[idx].skillName = skillName;
+            players[idx].matchesPlayed = parseInt(document.getElementById("editMatches").value) || 0;
+            closeModal();
+            saveDatabase();
+            renderPlayers();
+        }
+
+        function getPairKey(id1, id2) {
+            return id1 < id2 ? id1 + "-" + id2 : id2 + "-" + id1;
+        }
+
+        function suggestMatches() {
+            const available = players.filter(p => p.matchesPlayed < 6 && !p.isResting)
+                                     .sort((a, b) => a.matchesPlayed - b.matchesPlayed);
+
+            if (available.length < 4) {
+                alert("Không đủ 4 người chơi hợp lệ (dưới 6 set và không tạm nghỉ)!");
+                return;
+            }
+
+            let numCourts = 1;
+            if (available.length >= 17) numCourts = 3;
+            else if (available.length >= 9) numCourts = 2;
+
+            const needed = numCourts * 4;
+
+            let matches = [];
+            if (available.length > needed) {
+                matches = findBestCombination(available, numCourts);
+            } else {
+                const pool = available.slice(0, needed);
+                if (numCourts === 1) matches.push(evaluate4(pool[0], pool[1], pool[2], pool[3]));
+                else if (numCourts === 2) matches = partition2(pool);
+                else if (numCourts === 3) matches = partition3(pool);
+            }
+
+            currentMatches = [];
+            matches.forEach((m, i) => {
+                const courtNum = i + 1;
+                const skillDiff = Math.abs((m.t1.p1.skillScore + m.t1.p2.skillScore) - (m.t2.p1.skillScore + m.t2.p2.skillScore));
+
+                m.t1.p1.matchesPlayed++; m.t1.p2.matchesPlayed++;
+                m.t2.p1.matchesPlayed++; m.t2.p2.matchesPlayed++;
+
+                const logObj = recordHistory(courtNum, m.t1.p1, m.t1.p2, m.t2.p1, m.t2.p2, skillDiff);
+                currentMatches.push(logObj);
+            });
+
+            currentRound++;
+            saveDatabase();
+            renderPlayers();
+            renderResultBox();
+        }
+
+        function renderResultBox() {
+            const box = document.getElementById("resultBox");
+            if (currentMatches.length === 0) {
+                box.innerText = "Trận đấu tiếp theo sẽ hiển thị ở đây...";
+                return;
+            }
+
+            let html = `<div style="font-weight:bold; margin-bottom:8px;">Tổng khả dụng: Xếp ${currentMatches.length} sân</div>`;
+            currentMatches.forEach((m, idx) => {
+                const s1 = m.score1 !== undefined && m.score1 !== null ? m.score1 : '';
+                const s2 = m.score2 !== undefined && m.score2 !== null ? m.score2 : '';
+                html += `
+                    <div class="court-card">
+                        <div class="court-title">=== SÂN ${m.court} ===</div>
+                        <div><b>Đội 1:</b> ${m.p1.name} (${m.p1.gender} - ${m.p1.skillName}) + ${m.p2.name} (${m.p2.gender} - ${m.p2.skillName})</div>
+                        <div style="margin:2px 0;"><b>VS</b></div>
+                        <div><b>Đội 2:</b> ${m.p3.name} (${m.p3.gender} - ${m.p3.skillName}) + ${m.p4.name} (${m.p4.gender} - ${m.p4.skillName})</div>
+                        <div class="skill-diff">(Lệch trình: ${m.skillDiff.toFixed(2)})</div>
+                        <div class="score-row">
+                            <span style="font-size:12px; font-weight:bold;">Nhập tỉ số:</span>
+                            <input type="number" id="s1_${idx}" placeholder="Đội 1" value="${s1}" style="width:65px;" onchange="saveScore(${idx})">
+                            <span>-</span>
+                            <input type="number" id="s2_${idx}" placeholder="Đội 2" value="${s2}" style="width:65px;" onchange="saveScore(${idx})">
+                        </div>
+                    </div>
+                `;
+            });
+
+            box.innerHTML = html;
+        }
+
+        function saveScore(idx) {
+            const val1 = document.getElementById(`s1_${idx}`).value;
+            const val2 = document.getElementById(`s2_${idx}`).value;
+            currentMatches[idx].score1 = val1 !== "" ? parseInt(val1) : null;
+            currentMatches[idx].score2 = val2 !== "" ? parseInt(val2) : null;
+
+            const logIdx = historyLogs.findIndex(h => h.round === currentMatches[idx].round && h.court === currentMatches[idx].court);
+            if (logIdx !== -1) {
+                historyLogs[logIdx].score1 = currentMatches[idx].score1;
+                historyLogs[logIdx].score2 = currentMatches[idx].score2;
+            }
+
+            saveDatabase();
+        }
+
+        function findBestCombination(available, numCourts) {
+            const needed = numCourts * 4;
+            const minM = available[0].matchesPlayed;
+            let candidates = available.filter(p => p.matchesPlayed <= minM + 1);
+            if (candidates.length < needed) candidates = available.slice(0, Math.min(available.length, needed + 4));
+
+            let best = null, bestPenalty = 1e9;
+            if (numCourts === 1 && candidates.length >= 4) {
+                for (let i = 0; i < candidates.length; i++) {
+                    for (let j = i + 1; j < candidates.length; j++) {
+                        for (let k = j + 1; k < candidates.length; k++) {
+                            for (let m = k + 1; m < candidates.length; m++) {
+                                const match = evaluate4(candidates[i], candidates[j], candidates[k], candidates[m]);
+                                if (match.penalty < bestPenalty) {
+                                    bestPenalty = match.penalty;
+                                    best = [match];
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (numCourts === 2) best = partition2(candidates.slice(0, 8));
+            else if (numCourts === 3) best = partition3(candidates.slice(0, 12));
+
+            return best || [evaluate4(available[0], available[1], available[2], available[3])];
+        }
+
+        function evaluate4(p1, p2, p3, p4) {
+            const opts = [
+                createOption(p1, p2, p3, p4),
+                createOption(p1, p3, p2, p4),
+                createOption(p1, p4, p2, p3)
+            ];
+            opts.sort((a, b) => a.penalty - b.penalty);
+            return opts[0];
+        }
+
+        function createOption(a1, a2, b1, b2) {
+            const skillDiff = Math.abs((a1.skillScore + a2.skillScore) - (b1.skillScore + b2.skillScore)) * 5.0;
+            const m1 = (a1.gender === 'Nam' ? 1 : 0) + (a2.gender === 'Nam' ? 1 : 0);
+            const m2 = (b1.gender === 'Nam' ? 1 : 0) + (b2.gender === 'Nam' ? 1 : 0);
+            const totalMales = m1 + m2;
+
+            let genderDiff = 0;
+            if (totalMales === 2) {
+                genderDiff = (m1 === 1 && m2 === 1) ? 0 : 35.0;
+            } else if (totalMales === 0 || totalMales === 4) {
+                const sameGenderReps = (sameGenderMap[a1.id] || 0) + (sameGenderMap[a2.id] || 0) + (sameGenderMap[b1.id] || 0) + (sameGenderMap[b2.id] || 0);
+                genderDiff = sameGenderReps * 4.0;
+            } else {
+                genderDiff = 8.0;
+            }
+
+            let preferenceBonus = 0;
+            if ((a1.preferredTeammateId === a2.id) || (a2.preferredTeammateId === a1.id)) preferenceBonus += 150;
+            if ((b1.preferredTeammateId === b2.id) || (b2.preferredTeammateId === b1.id)) preferenceBonus += 150;
+
+            const t1Repeats = teammateMap[getPairKey(a1.id, a2.id)] || 0;
+            const t2Repeats = teammateMap[getPairKey(b1.id, b2.id)] || 0;
+            const historyPenalty = (t1Repeats + t2Repeats) * 15.0 - preferenceBonus;
+
+            return {
+                t1: { p1: a1, p2: a2 },
+                t2: { p1: b1, p2: b2 },
+                penalty: skillDiff + genderDiff + historyPenalty
+            };
+        }
+
+        function partition2(pool) {
+            let best = null, bestPenalty = 1e9;
+            for (let i = 1; i < 8; i++) {
+                for (let j = i + 1; j < 8; j++) {
+                    for (let k = j + 1; k < 8; k++) {
+                        const g1 = [pool[0], pool[i], pool[j], pool[k]];
+                        const g2 = pool.filter((_, idx) => idx !== 0 && idx !== i && idx !== j && idx !== k);
+                        const m1 = evaluate4(g1[0], g1[1], g1[2], g1[3]);
+                        const m2 = evaluate4(g2[0], g2[1], g2[2], g2[3]);
+                        if (m1.penalty + m2.penalty < bestPenalty) {
+                            bestPenalty = m1.penalty + m2.penalty;
+                            best = [m1, m2];
+                        }
+                    }
+                }
+            }
+            return best;
+        }
+
+        function partition3(pool) {
+            let best = null, bestPenalty = 1e9;
+            for (let i = 1; i < 12; i++) {
+                for (let j = i + 1; j < 12; j++) {
+                    for (let k = j + 1; k < 12; k++) {
+                        const g1 = [pool[0], pool[i], pool[j], pool[k]];
+                        const rem8 = pool.filter((_, idx) => idx !== 0 && idx !== i && idx !== j && idx !== k);
+                        for (let a = 1; a < 8; a++) {
+                            for (let b = a + 1; b < 8; b++) {
+                                for (let c = b + 1; c < 8; c++) {
+                                    const g2 = [rem8[0], rem8[a], rem8[b], rem8[c]];
+                                    const g3 = rem8.filter((_, idx) => idx !== 0 && idx !== a && idx !== b && idx !== c);
+                                    const m1 = evaluate4(g1[0], g1[1], g1[2], g1[3]);
+                                    const m2 = evaluate4(g2[0], g2[1], g2[2], g2[3]);
+                                    const m3 = evaluate4(g3[0], g3[1], g3[2], g3[3]);
+                                    if (m1.penalty + m2.penalty + m3.penalty < bestPenalty) {
+                                        bestPenalty = m1.penalty + m2.penalty + m3.penalty;
+                                        best = [m1, m2, m3];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return best;
+        }
+
+        function recordHistory(courtNum, p1, p2, p3, p4, skillDiff) {
+            const k1 = getPairKey(p1.id, p2.id);
+            const k2 = getPairKey(p3.id, p4.id);
+            teammateMap[k1] = (teammateMap[k1] || 0) + 1;
+            teammateMap[k2] = (teammateMap[k2] || 0) + 1;
+
+            if (p1.gender === p2.gender) {
+                sameGenderMap[p1.id] = (sameGenderMap[p1.id] || 0) + 1;
+                sameGenderMap[p2.id] = (sameGenderMap[p2.id] || 0) + 1;
+            }
+            if (p3.gender === p4.gender) {
+                sameGenderMap[p3.id] = (sameGenderMap[p3.id] || 0) + 1;
+                sameGenderMap[p4.id] = (sameGenderMap[p4.id] || 0) + 1;
+            }
+
+            const logObj = {
+                round: currentRound,
+                court: courtNum,
+                p1: p1, p2: p2, p3: p3, p4: p4,
+                skillDiff: skillDiff,
+                score1: null,
+                score2: null
+            };
+            historyLogs.push(logObj);
+            return logObj;
+        }
+
+        function viewHistory() {
+            if (historyLogs.length === 0) { alert("Chưa có lịch sử!"); return; }
+            let text = `LỊCH SỬ TẤT CẢ CÁC SET (${historyLogs.length} set):\n\n`;
+            historyLogs.forEach(h => {
+                const scoreText = (h.score1 !== null && h.score2 !== null) ? ` [Tỉ số: ${h.score1} - ${h.score2}]` : '';
+                text += `Lượt ${h.round} - Sân ${h.court}:${scoreText}\n  Đội 1: ${h.p1.name} (${h.p1.gender} - ${h.p1.skillName}) + ${h.p2.name} (${h.p2.gender} - ${h.p2.skillName})\n  VS\n  Đội 2: ${h.p3.name} (${h.p3.gender} - ${h.p3.skillName}) + ${h.p4.name} (${h.p4.gender} - ${h.p4.skillName})\n---\n`;
+            });
+            showModal(`<div class="modal-title">Lịch Sử Trận Đấu</div><div style="font-size:13px; white-space:pre-wrap; max-height:300px; overflow-y:auto;">${text}</div><button class="modal-btn" onclick="closeModal()">Đóng</button>`);
+        }
+
+        function viewPlayerHistory(pid) {
+            const playerSets = historyLogs.filter(h => h.p1.id === pid || h.p2.id === pid || h.p3.id === pid || h.p4.id === pid);
+            if (playerSets.length === 0) { alert("Người chơi chưa tham gia set nào!"); return; }
+            let text = `LỊCH SỬ CÁC SET (${playerSets.length}/6 set):\n\n`;
+            playerSets.forEach(h => {
+                const scoreText = (h.score1 !== null && h.score2 !== null) ? ` [Tỉ số: ${h.score1} - ${h.score2}]` : '';
+                text += `Lượt ${h.round} - Sân ${h.court}:${scoreText}\n  Đội 1: ${h.p1.name} + ${h.p2.name}\n  VS\n  Đội 2: ${h.p3.name} + ${h.p4.name}\n---\n`;
+            });
+            showModal(`<div class="modal-title">Lịch Sử Set</div><div style="font-size:13px; white-space:pre-wrap;">${text}</div><button class="modal-btn" onclick="closeModal()">Đóng</button>`);
+        }
+
+        function resetData() {
+            if (confirm("Reset toàn bộ danh sách người chơi, tỉ số và lịch sử? Bấm OK để làm mới.")) {
+                players = [];
+                historyLogs = [];
+                currentMatches = [];
+                teammateMap = {};
+                sameGenderMap = {};
+                currentRound = 1;
+                document.getElementById("resultBox").innerText = "Đã làm mới dữ liệu!";
+                saveDatabase();
+                renderPlayers();
+            }
+        }
+
+        function showModal(html) {
+            document.getElementById("modalContent").innerHTML = html;
+            document.getElementById("modal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
