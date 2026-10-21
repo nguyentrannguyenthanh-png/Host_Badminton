@@ -114,6 +114,10 @@ public class HistoryManager {
         public Integer getScore1() { return score1; }
         public Integer getScore2() { return score2; }
 
+        // 🟢 THÊM 2 HÀM NÀY VÀO LÀ HẾT LỖI
+        public int getRoundNumber() { return roundNumber; }
+        public int getCourtNumber() { return courtNumber; }
+
         public boolean containsPlayer(String playerId) {
             return p1.getId().equals(playerId) || p2.getId().equals(playerId) ||
                     p3.getId().equals(playerId) || p4.getId().equals(playerId);

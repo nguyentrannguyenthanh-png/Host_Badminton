@@ -1,5 +1,7 @@
 package com.example.hostbadminton;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -16,6 +18,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,13 +30,17 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etPlayerName;
     private Spinner spinnerGender, spinnerSkill;
-    private Button btnAddPlayer, btnSuggestMatch, btnViewHistory, btnReset;
+    private Button btnAddPlayer, btnSuggestMatch, btnViewHistory, btnReset, btnReload;
     private TextView tvMatchResult;
     private ListView lvPlayers;
 
     private List<Player> playerList = new ArrayList<>();
     private HistoryManager historyManager = new HistoryManager();
+    private List<HistoryManager.SetRecord> currentRoundRecords = new ArrayList<>();
     private ArrayAdapter<Player> playerAdapter;
+
+    private static final String PREFS_NAME = "HostBadmintonPrefs";
+    private static final String KEY_PLAYERS = "saved_players";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +55,18 @@ public class MainActivity extends AppCompatActivity {
         btnSuggestMatch = findViewById(R.id.btnSuggestMatch);
         btnViewHistory = findViewById(R.id.btnViewHistory);
         btnReset = findViewById(R.id.btnReset);
+        btnReload = findViewById(R.id.btnReload);
         tvMatchResult = findViewById(R.id.tvMatchResult);
         lvPlayers = findViewById(R.id.lvPlayers);
+
+        // Tải dữ liệu lưu trữ vĩnh viễn (Database)
+        loadPlayersFromPrefs();
+
+        // Nút Tải Lại
+        btnReload.setOnClickListener(v -> {
+            recreate();
+            Toast.makeText(this, "Đã tải lại trang!", Toast.LENGTH_SHORT).show();
+        });
 
         // Đổ dữ liệu Giới tính vào Spinner
         ArrayAdapter<Gender> genderAdapter = new ArrayAdapter<>(this,
@@ -107,13 +127,14 @@ public class MainActivity extends AppCompatActivity {
 
             Player newPlayer = new Player(id, name, selectedSkill, selectedGender);
             playerList.add(newPlayer);
+            savePlayersToPrefs();
             playerAdapter.notifyDataSetChanged();
 
             etPlayerName.setText("");
             Toast.makeText(this, "Đã thêm: " + name + " (" + selectedGender.getDisplayName() + ")", Toast.LENGTH_SHORT).show();
         });
 
-        // Sự kiện Xem Lịch Sử & Nhập Tỉ Số
+        // Sự kiện Xem Lịch Sử & Nhập Tỉ Số Trận
         btnViewHistory.setOnClickListener(v -> {
             List<HistoryManager.SetRecord> records = historyManager.getAllSetRecords();
             if (records.isEmpty()) {
@@ -136,15 +157,15 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         });
 
-        // Sự kiện Làm mới
+        // Sự kiện Làm Mới (2 TÙY CHỌN MỚI)
         btnReset.setOnClickListener(v -> {
             String[] resetOptions = {
-                    "Bắt đầu buổi mới (Reset số set về 0 & xóa lịch sử)",
-                    "Xóa toàn bộ danh sách người chơi"
+                    "1. Bắt đầu buổi mới (Reset các set về 0 & giữ danh sách)",
+                    "2. Reset hết tất cả (Xóa danh sách người chơi & lịch sử)"
             };
 
             new AlertDialog.Builder(this)
-                    .setTitle("Làm mới dữ liệu")
+                    .setTitle("Tùy Chọn Làm Mới Dữ Liệu")
                     .setItems(resetOptions, (dialog, which) -> {
                         if (which == 0) {
                             for (Player p : playerList) {
@@ -153,13 +174,17 @@ public class MainActivity extends AppCompatActivity {
                                 p.setPreferredTeammateId(null);
                             }
                             historyManager.clearHistory();
-                            tvMatchResult.setText("Trận đấu tiếp theo sẽ hiển thị ở đây...");
+                            currentRoundRecords.clear();
+                            tvMatchResult.setText("Đã reset các set về 0! Giữ nguyên danh sách.");
+                            savePlayersToPrefs();
                             playerAdapter.notifyDataSetChanged();
-                            Toast.makeText(this, "Đã làm mới số set và lịch sử đấu!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Đã reset các set về 0!", Toast.LENGTH_SHORT).show();
                         } else if (which == 1) {
                             playerList.clear();
                             historyManager.clearHistory();
+                            currentRoundRecords.clear();
                             tvMatchResult.setText("Trận đấu tiếp theo sẽ hiển thị ở đây...");
+                            savePlayersToPrefs();
                             playerAdapter.notifyDataSetChanged();
                             Toast.makeText(this, "Đã xóa toàn bộ người chơi!", Toast.LENGTH_SHORT).show();
                         }
@@ -168,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         });
 
-        // Sự kiện Xếp trận tự động
+        // Sự kiện Xếp Trận Tự Động
         btnSuggestMatch.setOnClickListener(v -> {
             List<Player> availablePlayers = new ArrayList<>();
             for (Player p : playerList) {
@@ -195,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
                         .append(" người -> Xếp ").append(matches.size()).append(" sân (")
                         .append(totalPlaying).append(" người đánh, ").append(restingCount).append(" người nghỉ xoay vòng)\n\n");
 
+                currentRoundRecords.clear();
                 for (int i = 0; i < matches.size(); i++) {
                     MatchOption match = matches.get(i);
                     int courtNum = i + 1;
@@ -214,12 +240,23 @@ public class MainActivity extends AppCompatActivity {
                     match.getTeam2().first.setMatchesPlayed(match.getTeam2().first.getMatchesPlayed() + 1);
                     match.getTeam2().second.setMatchesPlayed(match.getTeam2().second.getMatchesPlayed() + 1);
 
-                    historyManager.recordMatch(courtNum, match.getTeam1(), match.getTeam2(), match.getSkillDiff());
+                    HistoryManager.SetRecord rec = historyManager.recordMatch(courtNum, match.getTeam1(), match.getTeam2(), match.getSkillDiff());
+                    currentRoundRecords.add(rec);
                 }
 
                 historyManager.nextRound();
                 tvMatchResult.setText(sb.toString().trim());
+                savePlayersToPrefs();
                 playerAdapter.notifyDataSetChanged();
+
+                // Hộp thoại gợi ý nhập tỉ số ngay cho các sân
+                new AlertDialog.Builder(this)
+                        .setTitle("Xếp Trận Thành Công!")
+                        .setMessage("Bạn có muốn nhập tỉ số cho các sân ngay bây giờ?")
+                        .setPositiveButton("Nhập Tỉ Số", (d, w) -> showScoreInputDialog())
+                        .setNegativeButton("Để Sau", null)
+                        .show();
+
             } else {
                 Toast.makeText(this, "Không tìm được phương án xếp trận phù hợp!", Toast.LENGTH_SHORT).show();
             }
@@ -231,6 +268,61 @@ public class MainActivity extends AppCompatActivity {
             if (p.getId().equals(id)) return p;
         }
         return null;
+    }
+
+    private void savePlayersToPrefs() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        JSONArray array = new JSONArray();
+
+        for (Player p : playerList) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("id", p.getId());
+                obj.put("name", p.getName());
+                obj.put("gender", p.getGender().name());
+                obj.put("skill", p.getSkill().name());
+                obj.put("matchesPlayed", p.getMatchesPlayed());
+                obj.put("isResting", p.isResting());
+                obj.put("preferredTeammateId", p.getPreferredTeammateId() != null ? p.getPreferredTeammateId() : "");
+                array.put(obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        editor.putString(KEY_PLAYERS, array.toString());
+        editor.apply();
+    }
+
+    private void loadPlayersFromPrefs() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String jsonStr = prefs.getString(KEY_PLAYERS, null);
+        playerList.clear();
+
+        if (jsonStr != null && !jsonStr.isEmpty()) {
+            try {
+                JSONArray array = new JSONArray(jsonStr);
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject obj = array.getJSONObject(i);
+                    String id = obj.getString("id");
+                    String name = obj.getString("name");
+                    Gender gender = Gender.valueOf(obj.getString("gender"));
+                    PlayerSkill skill = PlayerSkill.valueOf(obj.getString("skill"));
+                    int matchesPlayed = obj.getInt("matchesPlayed");
+                    boolean isResting = obj.getBoolean("isResting");
+                    String prefId = obj.optString("preferredTeammateId", "");
+
+                    Player p = new Player(id, name, skill, gender);
+                    p.setMatchesPlayed(matchesPlayed);
+                    p.setResting(isResting);
+                    if (!prefId.isEmpty()) p.setPreferredTeammateId(prefId);
+
+                    playerList.add(p);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // 🟢 HỘP THOẠI NHẬP TỈ SỐ CHO CÁC TRẬN ĐANG ĐÁNH
@@ -249,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
             HistoryManager.SetRecord rec = allRecords.get(i);
 
             TextView tvTitle = new TextView(this);
-            tvTitle.setText("Trận " + (i + 1) + " (Sân " + rec.getFormattedText().split("\n")[0] + "):");
+            tvTitle.setText("Trận " + (i + 1) + " (Sân " + rec.getCourtNumber() + " - Lượt " + rec.getRoundNumber() + "):");
             tvTitle.setPadding(0, 20, 0, 10);
             tvTitle.setTextSize(14);
             layout.addView(tvTitle);
@@ -258,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
             row.setOrientation(LinearLayout.HORIZONTAL);
 
             EditText et1 = new EditText(this);
-            et1.setHint("Đội 1");
+            et1.setHint("Điểm Đội 1");
             et1.setInputType(InputType.TYPE_CLASS_NUMBER);
             if (rec.getScore1() != null) et1.setText(String.valueOf(rec.getScore1()));
             LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
@@ -272,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
             row.addView(tvVs);
 
             EditText et2 = new EditText(this);
-            et2.setHint("Đội 2");
+            et2.setHint("Điểm Đội 2");
             et2.setInputType(InputType.TYPE_CLASS_NUMBER);
             if (rec.getScore2() != null) et2.setText(String.valueOf(rec.getScore2()));
             LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
@@ -326,6 +418,7 @@ public class MainActivity extends AppCompatActivity {
                             Player partner = getPlayerById(player.getPreferredTeammateId());
                             if (partner != null) partner.setPreferredTeammateId(null);
                             player.setPreferredTeammateId(null);
+                            savePlayersToPrefs();
                             playerAdapter.notifyDataSetChanged();
                             Toast.makeText(this, "Đã hủy yêu cầu ghép cặp.", Toast.LENGTH_SHORT).show();
                         } else {
@@ -335,6 +428,7 @@ public class MainActivity extends AppCompatActivity {
                         showPlayerSetHistoryDialog(player);
                     } else if (which == 3) {
                         player.setResting(!player.isResting());
+                        savePlayersToPrefs();
                         playerAdapter.notifyDataSetChanged();
                         Toast.makeText(this, player.getName() + (player.isResting() ? " đã tạm nghỉ." : " đã tiếp tục chơi."), Toast.LENGTH_SHORT).show();
                     } else if (which == 4) {
@@ -343,6 +437,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setMessage("Bạn có chắc chắn muốn xóa " + player.getName() + " khỏi danh sách?")
                                 .setPositiveButton("Xóa", (d, w) -> {
                                     playerList.remove(position);
+                                    savePlayersToPrefs();
                                     playerAdapter.notifyDataSetChanged();
                                     Toast.makeText(this, "Đã xóa thành công.", Toast.LENGTH_SHORT).show();
                                 })
@@ -375,6 +470,7 @@ public class MainActivity extends AppCompatActivity {
                     Player partner = otherPlayers.get(which);
                     player.setPreferredTeammateId(partner.getId());
                     partner.setPreferredTeammateId(player.getId());
+                    savePlayersToPrefs();
                     playerAdapter.notifyDataSetChanged();
                     Toast.makeText(this, "Đã ghi nhận yêu cầu ghép cặp: " + player.getName() + " & " + partner.getName(), Toast.LENGTH_SHORT).show();
                 })
@@ -470,6 +566,7 @@ public class MainActivity extends AppCompatActivity {
                     player.setSkill((PlayerSkill) spSkill.getSelectedItem());
                     player.setMatchesPlayed(matches);
 
+                    savePlayersToPrefs();
                     playerAdapter.notifyDataSetChanged();
                     Toast.makeText(this, "Đã cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
                 })
