@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Host Badminton</string>
+    <string name="btn_suggest_match">Xep Tu Dong</string>
+    <string name="btn_manual_match">Xep Thu Cong</string>
+    <string name="btn_undo_match">Huy Tran Vua Xep</string>
+    <string name="btn_view_history">Lich Su Set</string>
+    <string name="btn_reset">Lam Moi</string>
+    <string name="btn_reload">↻</string>
+    <string name="btn_logout">Dang Xuat</string>
+    <string name="btn_manage_stock">Nhap Kho Cau</string>
+    <string name="btn_share_report">Chia Se / Sao Chep Bao Cao</string>
+    <string name="btn_save_session">Chot &amp; Luu Buoi</string>
+    <string name="btn_view_revenue">Bao Cao Doanh Thu</string>
+    <string name="title_actions">Bo Thao Tac Xep Tran &amp; Quan Ly</string>
+    <string name="title_next_match">Tran Dau Tiep Theo Tren San</string>
+    <string name="title_player_list">Danh Sach Cau Thu</string>
+    <string name="title_expense">Nhap Chi Phi Buoi Danh (VND)</string>
+    <string name="title_expense_result">Ket Qua Chia Tien Buoi Danh</string>
+    <string name="title_stats">Thong Ke Buoi Dau Cau Long</string>
+</resources>

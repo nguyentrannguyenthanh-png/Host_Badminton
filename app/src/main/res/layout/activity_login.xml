@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF0F4"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- THẺ BIỂU TƯỢNG LOGO NỔI THỜI TRANG -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="-40dp"
+            android:translationZ="8dp"
+            app:cardBackgroundColor="#FFE5EC"
+            app:cardCornerRadius="40dp"
+            app:cardElevation="6dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="🏸"
+                android:textSize="38sp" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- KHUNG THẺ ĐĂNG NHẬP CHÍNH -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingLeft="24dp"
+                android:paddingTop="48dp"
+                android:paddingRight="24dp"
+                android:paddingBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HOST BADMINTON"
+                    android:textColor="#E65C82"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Hệ Thống Quản Lý &amp; Xếp Trận Sân Cầu"
+                    android:textColor="#757575"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvTitleMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="Đăng Nhập Tài Khoản Chủ Sân"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- TÊN TÀI KHOẢN -->
+                <EditText
+                    android:id="@+id/etUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:autofillHints="username"
+                    android:background="@android:drawable/editbox_background"
+                    android:hint="👤 Tên tài khoản"
+                    android:inputType="text"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#757575"
+                    android:textSize="14sp" />
+
+                <!-- MẬT KHẨU -->
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:autofillHints="password"
+                    android:background="@android:drawable/editbox_background"
+                    android:hint="🔒 Mật khẩu"
+                    android:inputType="textPassword"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#757575"
+                    android:textSize="14sp" />
+
+                <!-- GHI NHỚ MẬT KHẨU -->
+                <CheckBox
+                    android:id="@+id/cbRememberPass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Ghi nhớ mật khẩu đăng nhập"
+                    android:textColor="#000000"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- SỐ ĐIỆN THOẠI (KHI ĐĂNG KÝ) -->
+                <EditText
+                    android:id="@+id/etPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:autofillHints="phone"
+                    android:background="@android:drawable/editbox_background"
+                    android:hint="📱 Số điện thoại"
+                    android:inputType="phone"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#757575"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <!-- KHU VỰC OTP -->
+                <LinearLayout
+                    android:id="@+id/layoutOtp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/etOtp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:autofillHints="postalCode"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="🔑 Mã OTP (6 số)"
+                        android:inputType="number"
+                        android:padding="14dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#757575"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnSendOtp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:backgroundTint="#FF7096"
+                        app:backgroundTint="#FF7096"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="Gửi Mã"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- NÚT ĐĂNG NHẬP VIÊN THUỐC -->
+                <Button
+                    android:id="@+id/btnSubmit"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF7096"
+                    app:backgroundTint="#FF7096"
+                    app:cornerRadius="26dp"
+                    android:text="ĐĂNG NHẬP"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- NÚT ĐỔI CHẾ ĐỘ ĐĂNG KÝ -->
+                <Button
+                    android:id="@+id/btnSwitchMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:backgroundTint="#FFE5EC"
+                    app:backgroundTint="#FFE5EC"
+                    app:cornerRadius="24dp"
+                    android:text="Chưa có tài khoản? Đăng ký ngay"
+                    android:textAllCaps="false"
+                    android:textColor="#000000"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- NÚT QUÊN MẬT KHẨU -->
+                <Button
+                    android:id="@+id/btnForgotPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:backgroundTint="#FFF0F4"
+                    app:backgroundTint="#FFF0F4"
+                    app:cornerRadius="24dp"
+                    android:text="Quên mật khẩu?"
+                    android:textAllCaps="false"
+                    android:textColor="#000000"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.HostBadminton" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF7096</item>
+        <item name="colorPrimaryVariant">#E65C82</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="colorSecondary">#FFB3C6</item>
+        <item name="colorSecondaryVariant">#FF80AB</item>
+        <item name="colorOnSecondary">#000000</item>
+    </style>
+</resources>

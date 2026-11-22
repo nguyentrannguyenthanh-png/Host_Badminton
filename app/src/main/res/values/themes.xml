@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme với TÔNG MÀU HỒNG - KHÔNG DÙNG MÀU TÍM -->
+    <style name="Base.Theme.HostBadminton" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF7096</item>
+        <item name="colorPrimaryVariant">#E65C82</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="colorSecondary">#FFB3C6</item>
+        <item name="colorSecondaryVariant">#FF80AB</item>
+        <item name="colorOnSecondary">#000000</item>
+
+        <item name="android:statusBarColor">#FF7096</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+
+    <style name="Theme.HostBadminton" parent="Base.Theme.HostBadminton" />
+</resources>
