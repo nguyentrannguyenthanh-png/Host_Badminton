@@ -15,30 +15,36 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void updateMainActivityFields() throws Exception {
-        File f = new File("app/src/main/java/com/example/hostbadminton/MainActivity.java");
-        if (!f.exists()) f = new File("src/main/java/com/example/hostbadminton/MainActivity.java");
-        if (!f.exists()) f = new File("../app/src/main/java/com/example/hostbadminton/MainActivity.java");
+    public void fixMessengerShareTextDrop() throws Exception {
+        String javaPath = "src/main/java/com/example/hostbadminton/MainActivity.java";
+        if (!new File(javaPath).exists()) javaPath = "app/src/main/java/com/example/hostbadminton/MainActivity.java";
 
-        System.out.println("Checking MainActivity.java at: " + f.getAbsolutePath() + ", exists=" + f.exists());
+        if (new File(javaPath).exists()) {
+            String content = new String(Files.readAllBytes(Paths.get(javaPath)), StandardCharsets.UTF_8);
+            content = content.replace("\r\n", "\n");
 
-        if (f.exists()) {
-            String jContent = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
-            jContent = jContent.replace("\r\n", "\n");
+            String oldCode = "                                        // ALWAYS auto copy to clipboard just in case the target app ignores EXTRA_TEXT\n" +
+                    "                                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);\n" +
+                    "                                        ClipData cd = ClipData.newPlainText(\"Báo Cáo\", reportText);\n" +
+                    "                                        if (cb != null) {\n" +
+                    "                                            cb.setPrimaryClip(cd);\n" +
+                    "                                        }\n" +
+                    "                                        \n" +
+                    "                                        Toast.makeText(MainActivity.this, \"Đã tự động sao chép văn bản. Vui lòng DÁN (Paste) để gửi kèm ảnh!\", Toast.LENGTH_LONG).show();";
 
-            if (!jContent.contains("import android.net.Uri;")) {
-                jContent = jContent.replace("import android.content.Intent;", "import android.content.Intent;\nimport android.net.Uri;");
-            }
-            if (!jContent.contains("import android.widget.ImageView;")) {
-                jContent = jContent.replace("import android.widget.EditText;", "import android.widget.EditText;\nimport android.widget.ImageView;");
-            }
+            String newCode = "                                        // ĐẶC TRỊ MESSENGER & ZALO: \n" +
+                    "                                        // Cố tình đẩy thẳng text vào clipboard, không để app tự quyết định\n" +
+                    "                                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);\n" +
+                    "                                        ClipData cd = ClipData.newPlainText(\"Báo Cáo\", reportText);\n" +
+                    "                                        if (cb != null) {\n" +
+                    "                                            cb.setPrimaryClip(cd);\n" +
+                    "                                        }\n" +
+                    "                                        \n" +
+                    "                                        Toast.makeText(MainActivity.this, \"HÃY BẤM DÁN (PASTE) CHỮ VÀO TIN NHẮN!\", Toast.LENGTH_LONG).show();";
 
-            int idx = jContent.indexOf("private Button btnSaveAndCalculate");
-            if (idx != -1 && !jContent.contains("btnSelectQrCode")) {
-                String decl = "private Button btnSelectQrCode;\n    private ImageView ivQrCodePreview;\n    private Uri qrCodeUri = null;\n    private static final int PICK_QR_IMAGE_REQUEST = 1001;\n    ";
-                jContent = jContent.substring(0, idx) + decl + jContent.substring(idx);
-                Files.write(f.toPath(), jContent.getBytes(StandardCharsets.UTF_8));
-                System.out.println("Successfully added QR code fields to MainActivity.java");
+            if (content.contains(oldCode)) {
+                content = content.replace(oldCode, newCode);
+                Files.write(Paths.get(javaPath), content.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

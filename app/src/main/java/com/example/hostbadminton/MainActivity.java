@@ -34,6 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import androidx.core.content.FileProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -472,17 +477,65 @@ public class MainActivity extends AppCompatActivity {
                         .setTitle("Xuất Báo Cáo Thu Tiền Sân")
                         .setItems(options, (dialog, which) -> {
                             if (which == 0) {
+                                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("Báo Cáo Chi Phí Cầu Lông", reportText);
+                                if (clipboard != null) {
+                                    clipboard.setPrimaryClip(clip);
+                                }
+                                
                                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                                 if (qrCodeUri != null) {
-                                    shareIntent.setType("image/*");
-                                    shareIntent.putExtra(Intent.EXTRA_TEXT, reportText);
-                                    shareIntent.putExtra(Intent.EXTRA_STREAM, qrCodeUri);
-                                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    try {
+                                        // Create a temporary file in cache to share securely
+                                        File cachePath = new File(getCacheDir(), "images");
+                                        cachePath.mkdirs(); // don't forget to make the directory
+                                        File tempImage = new File(cachePath, "qr_code.png");
+                                        
+                                        InputStream in = getContentResolver().openInputStream(qrCodeUri);
+                                        OutputStream out = new FileOutputStream(tempImage);
+                                        byte[] buf = new byte[1024];
+                                        int len;
+                                        while ((len = in.read(buf)) > 0) {
+                                            out.write(buf, 0, len);
+                                        }
+                                        out.close();
+                                        in.close();
+                                        
+                                        // Use FileProvider to get a shareable URI
+                                        Uri contentUri = FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".fileprovider", tempImage);
+                                        
+                                        shareIntent.setType("image/*");
+                                        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                                        shareIntent.putExtra(Intent.EXTRA_TEXT, reportText);
+                                        // CRITICAL FOR ANDROID 11+ (API 30+): Explicitly setting ClipData with the content URI
+                                        // We use Intent.ACTION_SEND to send both image and text.
+                                        // NOTE: Messenger ignores EXTRA_TEXT if type is image/*. It forces users to paste text.
+                                        // To ensure the user can paste easily, we auto-copy text to clipboard.
+                                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                        ClipData cd = ClipData.newPlainText("Báo Cáo", reportText);
+                                        if (cb != null) {
+                                            cb.setPrimaryClip(cd);
+                                        }
+                                        
+                                        shareIntent.setClipData(ClipData.newRawUri("QR Code", contentUri));
+                                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        
+                                        Toast.makeText(MainActivity.this, "Đã tự động sao chép văn bản. Vui lòng DÁN (Paste) để gửi kèm ảnh!", Toast.LENGTH_LONG).show();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        shareIntent.setType("text/plain");
+                                        shareIntent.putExtra(Intent.EXTRA_TEXT, reportText);
+                                        Toast.makeText(MainActivity.this, "Lỗi lấy ảnh QR, chỉ gửi chữ.", Toast.LENGTH_SHORT).show();
+                                    }
                                 } else {
                                     shareIntent.setType("text/plain");
                                     shareIntent.putExtra(Intent.EXTRA_TEXT, reportText);
                                 }
-                                startActivity(Intent.createChooser(shareIntent, "Chia sẻ báo cáo thu tiền & QR:"));
+                                
+                                Intent chooserIntent = Intent.createChooser(shareIntent, "Chia sẻ báo cáo thu tiền:");
+                                // CRITICAL FOR ANDROID 11+ (API 30+): Grant permission on the chooser intent as well
+                                chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                startActivity(chooserIntent);
                             } else {
                                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                                 ClipData clip = ClipData.newPlainText("Báo Cáo Chi Phí Cầu Lông", reportText);
@@ -1291,7 +1344,7 @@ public class MainActivity extends AppCompatActivity {
         winsMap.put(playerName, winsMap.getOrDefault(playerName, 0) + 1);
     }
 
-    private String generateExpenseReportText() {
+        private String generateExpenseReportText() {
         double totalExp = currentExpense != null ? currentExpense.getTotalExpense() : 0;
         int playerCount = playerList.size();
 
@@ -1304,33 +1357,36 @@ public class MainActivity extends AppCompatActivity {
 
         boolean isFixed = cbFixedFeeMode != null && cbFixedFeeMode.isChecked();
         boolean isSepGender = cbSeparateGenderFee != null && cbSeparateGenderFee.isChecked();
+        boolean isThuRieng = isFixed || isSepGender;
 
         StringBuilder sb = new StringBuilder();
-        sb.append("📢 BÁO CÁO THU TIỀN SÂN CẦU LÔNG 📢\n");
+        sb.append("BÁO CÁO THU TIỀN SÂN CẦU LÔNG\n");
         sb.append("------------------------------------\n");
-        if (currentExpense != null && currentExpense.getCourtFee() > 0) {
-            sb.append("• Tiền sân: ").append(formatMoney(currentExpense.getCourtFee())).append(" VNĐ\n");
+        if (!isThuRieng) {
+            if (currentExpense != null && currentExpense.getCourtFee() > 0) {
+                sb.append("• Tiền sân: ").append(formatMoney(currentExpense.getCourtFee())).append(" VNĐ\n");
+            }
+            if (currentExpense != null && currentExpense.getShuttleFee() > 0) {
+                sb.append("• Tiền cầu: ").append(formatMoney(currentExpense.getShuttleFee())).append(" VNĐ\n");
+            }
+            if (currentExpense != null && currentExpense.getOtherFee() > 0) {
+                sb.append("• Chi phí khác: ").append(formatMoney(currentExpense.getOtherFee())).append(" VNĐ\n");
+            }
+            sb.append("------------------------------------\n");
+            sb.append("TỔNG CHI PHÍ BUỔI ĐÁNH: ").append(formatMoney(totalExp)).append(" VNĐ\n");
         }
-        if (currentExpense != null && currentExpense.getShuttleFee() > 0) {
-            sb.append("• Tiền cầu: ").append(formatMoney(currentExpense.getShuttleFee())).append(" VNĐ\n");
-        }
-        if (currentExpense != null && currentExpense.getOtherFee() > 0) {
-            sb.append("• Chi phí khác: ").append(formatMoney(currentExpense.getOtherFee())).append(" VNĐ\n");
-        }
-        sb.append("------------------------------------\n");
-        sb.append("👉 TỔNG CHI PHÍ BUỔI ĐÁNH: ").append(formatMoney(totalExp)).append(" VNĐ\n");
-        sb.append("👥 Tổng số người tham gia: ").append(playerCount).append(" người (Nam: ").append(maleCount).append(", Nữ: ").append(femaleCount).append(")\n");
+        sb.append("Tổng số người tham gia: ").append(playerCount).append(" người (Nam: ").append(maleCount).append(", Nữ: ").append(femaleCount).append(")\n");
 
         if (isSepGender) {
             double maleFee = etMaleFee != null ? parseDoubleSafe(etMaleFee.getText().toString()) : 0;
             double femaleFee = etFemaleFee != null ? parseDoubleSafe(etFemaleFee.getText().toString()) : 0;
-            sb.append("💵 MỨC THU CHUẨN: Nam ").append(formatMoney(maleFee)).append(" VNĐ | Nữ ").append(formatMoney(femaleFee)).append(" VNĐ\n");
+            sb.append("MỨC THU CHUẨN: Nam ").append(formatMoney(maleFee)).append(" VNĐ | Nữ ").append(formatMoney(femaleFee)).append(" VNĐ\n");
         } else if (isFixed) {
             double fixedFee = etFixedFeePerPlayer != null ? parseDoubleSafe(etFixedFeePerPlayer.getText().toString()) : 0;
-            sb.append("💵 MỨC THU CHUẨN (CỐ ĐỊNH): ").append(formatMoney(fixedFee)).append(" VNĐ / người\n");
+            sb.append("MỨC THU CHUẨN (CỐ ĐỊNH): ").append(formatMoney(fixedFee)).append(" VNĐ / người\n");
         } else {
             double perPlayer = playerCount > 0 ? (totalExp / playerCount) : 0;
-            sb.append("💵 MỨC THU CHUẨN (CHIA ĐỀU): ").append(formatMoney(perPlayer)).append(" VNĐ / người\n");
+            sb.append("MỨC THU CHUẨN (CHIA ĐỀU): ").append(formatMoney(perPlayer)).append(" VNĐ / người\n");
         }
 
         StringBuilder discountSb = new StringBuilder();
@@ -1338,19 +1394,21 @@ public class MainActivity extends AppCompatActivity {
             if (p.getDiscountAmount() > 0) {
                 double baseFee = getBaseFeeForPlayer(p);
                 double payable = Math.max(0, baseFee - p.getDiscountAmount());
-                discountSb.append(" • ").append(p.getName()).append(": ").append(formatMoney(payable)).append(" VNĐ (Được giảm ").append(formatMoney(p.getDiscountAmount())).append(" VNĐ)\n");
+                if (payable > 0) {
+                    discountSb.append(" • ").append(p.getName()).append(": ").append(formatMoney(payable)).append(" VNĐ (Được giảm ").append(formatMoney(p.getDiscountAmount())).append(" VNĐ)\n");
+                }
             }
         }
 
         if (discountSb.length() > 0) {
             sb.append("------------------------------------\n");
-            sb.append("🏷️ Danh sách giảm giá / Miễn phí riêng:\n");
+            sb.append("Danh sách giảm giá riêng:\n");
             sb.append(discountSb.toString());
         }
 
         if (currentExpense != null && !currentExpense.getNote().isEmpty()) {
             sb.append("------------------------------------\n");
-            sb.append("💳 Thông tin chuyển khoản / Ghi chú:\n");
+            sb.append("Thông tin chuyển khoản / Ghi chú:\n");
             sb.append(currentExpense.getNote()).append("\n");
         }
 
@@ -1787,5 +1845,26 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         toast.setGravity(android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL, 0, 120);
         toast.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_QR_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                try {
+                    getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception e) {}
+                qrCodeUri = uri;
+                if (ivQrCodePreview != null) {
+                    ivQrCodePreview.setImageURI(qrCodeUri);
+                    ivQrCodePreview.setVisibility(View.VISIBLE);
+                }
+                getSharedPreferences("HostBadmintonPrefs", MODE_PRIVATE)
+                    .edit().putString("qr_code_uri", qrCodeUri.toString()).apply();
+                Toast.makeText(this, "Đã chọn ảnh mã QR ngân hàng thành công!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

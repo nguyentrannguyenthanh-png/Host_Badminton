@@ -142,40 +142,48 @@ public class BadmintonMatchScheduler {
             return result;
         }
 
-        int numCourts = 1;
-        if (count >= 16) {
-            numCourts = 3;
-        } else if (count >= 12) {
-            numCourts = 2;
-        } else {
-            numCourts = 1;
-        }
-
+        int numCourts = (count - 1) / 8 + 1;
         int totalNeeded = numCourts * 4;
 
-        if (count > totalNeeded) {
-            return findBestPlayerCombination(availablePlayers, numCourts, historyManager);
+        if (numCourts == 1) {
+            return findBestSingleCourt(availablePlayers, historyManager);
         }
 
         List<Player> topPlayers = availablePlayers.subList(0, totalNeeded);
-
-        if (numCourts == 1) {
-            MatchOption match = evaluateMatch(topPlayers.get(0), topPlayers.get(1), topPlayers.get(2), topPlayers.get(3), historyManager);
-            if (match != null) result.add(match);
-        } else if (numCourts == 2) {
-            result = partitionTwoCourts(topPlayers, historyManager);
-        } else if (numCourts == 3) {
-            result = partitionThreeCourts(topPlayers, historyManager);
+        
+        int remainingCourts = numCourts;
+        int playerIndex = 0;
+        
+        while (remainingCourts > 0) {
+            int courtsToProcess;
+            if (remainingCourts >= 3) {
+                courtsToProcess = 3;
+            } else if (remainingCourts == 2) {
+                courtsToProcess = 2;
+            } else {
+                courtsToProcess = 1;
+            }
+            
+            int playersToProcess = courtsToProcess * 4;
+            List<Player> subPool = topPlayers.subList(playerIndex, playerIndex + playersToProcess);
+            
+            if (courtsToProcess == 1) {
+                MatchOption match = evaluateMatch(subPool.get(0), subPool.get(1), subPool.get(2), subPool.get(3), historyManager);
+                if (match != null) result.add(match);
+            } else if (courtsToProcess == 2) {
+                result.addAll(partitionTwoCourts(subPool, historyManager));
+            } else if (courtsToProcess == 3) {
+                result.addAll(partitionThreeCourts(subPool, historyManager));
+            }
+            
+            remainingCourts -= courtsToProcess;
+            playerIndex += playersToProcess;
         }
 
         return result;
     }
 
-    private static List<MatchOption> findBestPlayerCombination(List<Player> availablePlayers, int numCourts, HistoryManager historyManager) {
-        int totalNeeded = numCourts * 4;
-        List<MatchOption> bestMatches = null;
-        double bestPenalty = Double.MAX_VALUE;
-
+    private static List<MatchOption> findBestSingleCourt(List<Player> availablePlayers, HistoryManager historyManager) {
         int minMatches = availablePlayers.get(0).getMatchesPlayed();
         List<Player> candidatePool = new ArrayList<>();
         for (Player p : availablePlayers) {
@@ -183,31 +191,27 @@ public class BadmintonMatchScheduler {
                 candidatePool.add(p);
             }
         }
-        if (candidatePool.size() < totalNeeded) {
-            candidatePool = availablePlayers.subList(0, Math.min(availablePlayers.size(), totalNeeded + 4));
+        if (candidatePool.size() < 4) {
+            candidatePool = availablePlayers.subList(0, Math.min(availablePlayers.size(), 8));
         }
 
-        if (numCourts == 1 && candidatePool.size() >= 4) {
-            for (int i = 0; i < candidatePool.size(); i++) {
-                for (int j = i + 1; j < candidatePool.size(); j++) {
-                    for (int k = j + 1; k < candidatePool.size(); k++) {
-                        for (int m = k + 1; m < candidatePool.size(); m++) {
-                            MatchOption match = evaluateMatch(candidatePool.get(i), candidatePool.get(j), candidatePool.get(k), candidatePool.get(m), historyManager);
-                            if (match != null && match.getTotalPenalty() < bestPenalty) {
-                                bestPenalty = match.getTotalPenalty();
-                                bestMatches = Arrays.asList(match);
-                            }
+        List<MatchOption> bestMatches = new ArrayList<>();
+        double bestPenalty = Double.MAX_VALUE;
+        
+        for (int i = 0; i < candidatePool.size(); i++) {
+            for (int j = i + 1; j < candidatePool.size(); j++) {
+                for (int k = j + 1; k < candidatePool.size(); k++) {
+                    for (int m = k + 1; m < candidatePool.size(); m++) {
+                        MatchOption match = evaluateMatch(candidatePool.get(i), candidatePool.get(j), candidatePool.get(k), candidatePool.get(m), historyManager);
+                        if (match != null && match.getTotalPenalty() < bestPenalty) {
+                            bestPenalty = match.getTotalPenalty();
+                            bestMatches = java.util.Arrays.asList(match);
                         }
                     }
                 }
             }
-        } else if (numCourts == 2 && candidatePool.size() >= 8) {
-            bestMatches = partitionTwoCourts(candidatePool.subList(0, 8), historyManager);
-        } else if (numCourts == 3 && candidatePool.size() >= 12) {
-            bestMatches = partitionThreeCourts(candidatePool.subList(0, 12), historyManager);
         }
-
-        return bestMatches != null ? bestMatches : new ArrayList<>();
+        return bestMatches;
     }
 
     private static List<MatchOption> partitionTwoCourts(List<Player> players, HistoryManager historyManager) {
