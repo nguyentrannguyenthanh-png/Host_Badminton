@@ -1,154 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#FFF0F4" android:orientation="vertical">
-  <!-- KHU VỰC NỘI DUNG CHÍNH (WEIGHT = 1) -->
-  <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
-    <!-- ================= TAB 1: TRANG CHỦ CUỘN SIÊU MƯỢT ================= -->
-    <ScrollView android:id="@+id/layoutHome" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingLeft="14dp" android:paddingTop="36dp" android:paddingRight="14dp" android:paddingBottom="12dp" android:visibility="visible">
-      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-        <!-- 🏆 HEADER BẢNG ĐIỀU HÀNH TỐI GIẢN -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardCornerRadius="16dp" app:cardElevation="3dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="#FF7096" android:gravity="center" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏸 HOST BADMINTON" android:textColor="#FFFFFF" android:textSize="20sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Quản lý sân &amp; Xếp trận tự động thông minh" android:textColor="#FFE5EC" android:textSize="12sp" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- ➕ CARD THÊM NGƯỜI CHƠI TỐI GIẢN -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="2dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="➕ Thêm Cầu Thủ Mới" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <EditText android:id="@+id/etPlayerName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@android:drawable/editbox_background" android:hint="👤 Nhập tên người chơi..." android:inputType="textPersonName" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
-              <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Giới tính:" android:textColor="#000000" android:textSize="12sp" android:textStyle="bold" />
-                <Spinner android:id="@+id/spinnerGender" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
-              </LinearLayout>
-              <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1.5" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trình độ:" android:textColor="#000000" android:textSize="12sp" android:textStyle="bold" />
-                <Spinner android:id="@+id/spinnerSkill" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
-              </LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/dark_bg">
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/bottomNav">
+        
+        <!-- TAB 0: TRANG CHỦ (HOME / XẾP TRẬN) -->
+        <ScrollView android:id="@+id/layoutHome" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="visible">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trang chủ" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <Button android:id="@+id/btnSuggestMatch" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="@color/neon_green" android:textColor="@color/dark_bg" android:text="Tự Động" app:cornerRadius="12dp"/>
+                    <Button android:id="@+id/btnManualMatch" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:layout_marginStart="8dp" android:backgroundTint="@color/dark_input" android:textColor="@color/text_white" android:text="Thủ Công" app:cornerRadius="12dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+                    <Button android:id="@+id/btnUndoMatch" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="@color/dark_input" android:textColor="@color/text_white" android:text="Hủy Trận" app:cornerRadius="12dp"/>
+                    <Button android:id="@+id/btnViewHistory" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:layout_marginStart="8dp" android:backgroundTint="@color/dark_input" android:textColor="@color/text_white" android:text="Lịch Sử" app:cornerRadius="12dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp" android:layout_marginBottom="16dp">
+                    <Button android:id="@+id/btnReset" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="@color/dark_input" android:textColor="@color/text_white" android:text="Làm Mới" app:cornerRadius="12dp"/>
+                    <Button android:id="@+id/btnReload" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:layout_marginStart="8dp" android:backgroundTint="@color/dark_input" android:textColor="@color/text_white" android:text="Tải Lại" app:cornerRadius="12dp"/>
+                </LinearLayout>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trận Đấu Đang Diễn Ra" android:textColor="@color/text_white" android:textSize="18sp" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+                <TextView android:id="@+id/tvMatchResult" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:padding="16dp" android:text="Chưa có trận đấu nào được xếp" android:textColor="@color/text_gray" android:textSize="14sp"/>
             </LinearLayout>
-            <Button android:id="@+id/btnAddPlayer" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="12dp" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="24dp" android:text="Thêm Vào Danh Sách" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- ⚡ CARD BỘ THAO TÁC XẾP TRẬN TỐI GIẢN -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="2dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" Thao Tác Xếp Trận &amp; Quản Lý" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <!-- HÀNG NÚT NỔI BẬT: XẾP TỰ ĐỘNG | XẾP THỦ CÔNG -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
-              <Button android:id="@+id/btnSuggestMatch" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="24dp" android:text="Xếp trận tự động" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
-              <Button android:id="@+id/btnManualMatch" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginStart="8dp" android:layout_weight="1" android:backgroundTint="#FFE5EC" app:backgroundTint="#FFE5EC" app:cornerRadius="24dp" android:text="Xếp trận thủ công" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
+        </ScrollView>
+
+        <!-- TAB 1: CHI PHÍ (EXPENSE) -->
+        <ScrollView android:id="@+id/layoutExpenseStats" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi phí &amp; Thống kê" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng chi phí" android:textColor="@color/text_gray"/>
+                <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="@color/text_white" android:textSize="28sp" android:textStyle="bold"/>
+                <TextView android:id="@+id/tvPlayerCountSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Số người tham gia: 0" android:textColor="@color/text_gray" android:layout_marginBottom="16dp"/>
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_neon" android:orientation="vertical" android:padding="16dp" android:layout_marginBottom="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:id="@+id/tvCostPerPlayer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mỗi người đóng: 0đ" android:textColor="@color/text_white" android:textSize="16sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đã bao gồm tiền nước" android:textColor="@color/text_gray" android:textSize="12sp"/>
+                        </LinearLayout>
+                        <ImageView android:id="@+id/ivQrCodePreview" android:layout_width="48dp" android:layout_height="48dp" android:background="@color/white" android:visibility="gone"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền sân" android:textColor="@color/text_white"/>
+                    <EditText android:id="@+id/etCourtFee" android:layout_width="150dp" android:layout_height="wrap_content" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:gravity="end" android:inputType="numberDecimal"/>
+                </LinearLayout>
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền cầu" android:textColor="@color/text_white"/>
+                    <EditText android:id="@+id/etShuttleFee" android:layout_width="150dp" android:layout_height="wrap_content" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:gravity="end" android:inputType="numberDecimal"/>
+                </LinearLayout>
+
+                <!-- Hidden inputs to prevent crashes -->
+                <EditText android:id="@+id/etOtherFee" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <EditText android:id="@+id/etExpenseNote" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <EditText android:id="@+id/etFixedFeePerPlayer" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <EditText android:id="@+id/etShuttlesUsed" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <CheckBox android:id="@+id/cbFixedFeeMode" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <CheckBox android:id="@+id/cbUseInventoryShuttle" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <LinearLayout android:id="@+id/layoutFixedFeeInput" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <LinearLayout android:id="@+id/layoutInventoryShuttleCalc" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <TextView android:id="@+id/tvStockStatus" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <TextView android:id="@+id/tvGenderBreakdown" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <TextView android:id="@+id/tvHostBalance" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <Button android:id="@+id/btnSelectQrCode" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="vertical" android:padding="16dp" android:layout_marginBottom="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thu riêng Nam / Nữ" android:textColor="@color/text_white"/>
+                        <CheckBox android:id="@+id/cbSeparateGenderFee" android:layout_width="wrap_content" android:layout_height="wrap_content" android:buttonTint="@color/neon_green"/>
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/layoutSeparateGenderInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp" android:visibility="gone">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nam:" android:textColor="@color/text_gray" android:layout_gravity="center_vertical"/>
+                        <EditText android:id="@+id/etMaleFee" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:inputType="numberDecimal" android:layout_marginStart="8dp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nữ:" android:textColor="@color/text_gray" android:layout_gravity="center_vertical" android:layout_marginStart="16dp"/>
+                        <EditText android:id="@+id/etFemaleFee" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:inputType="numberDecimal" android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <Button android:id="@+id/btnSaveAndCalculate" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1" android:backgroundTint="@color/neon_green" android:textColor="@color/dark_bg" android:text="Lưu &amp; Tính tiền" app:cornerRadius="27dp"/>
+                    <Button android:id="@+id/btnShareExpenseReport" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1" android:layout_marginStart="12dp" android:background="@drawable/bg_btn_secondary" android:textColor="@color/neon_green" android:text="Chia sẻ Zalo" app:cornerRadius="27dp"/>
+                </LinearLayout>
             </LinearLayout>
-            <!-- HÀNG NÚT PHỤ: HỦY TRẬN | LỊCH SỬ SET -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
-              <Button android:id="@+id/btnUndoMatch" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:backgroundTint="#FF4081" app:backgroundTint="#FF4081" app:cornerRadius="22dp" android:text="Hủy trận vừa xếp" android:textColor="#FFFFFF" android:textSize="12sp" android:textStyle="bold" />
-              <Button android:id="@+id/btnViewHistory" android:layout_width="0dp" android:layout_height="44dp" android:layout_marginStart="8dp" android:layout_weight="1" android:backgroundTint="#FFF0F4" app:backgroundTint="#FFF0F4" app:cornerRadius="22dp" android:text="Lịch sử Set" android:textColor="#000000" android:textSize="12sp" android:textStyle="bold" />
+        </ScrollView>
+
+        <!-- TAB 2: THÀNH VIÊN (MEMBERS) -->
+        <ScrollView android:id="@+id/layoutMembers" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thành viên" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold"/>
+                    <Button android:id="@+id/btnAddPlayer" android:layout_width="wrap_content" android:layout_height="40dp" android:background="@drawable/bg_btn_secondary" android:textColor="@color/neon_green" android:text="+ Thêm" android:textAllCaps="false"/>
+                </LinearLayout>
+                
+                <!-- Hidden inputs for adding players to keep logic intact -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <EditText android:id="@+id/etPlayerName" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    <Spinner android:id="@+id/spinnerGender" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    <Spinner android:id="@+id/spinnerSkill" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/layoutPlayerListContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
             </LinearLayout>
-            <!-- HÀNG NÚT HỆ THỐNG: LÀM MỚI | TẢI LẠI | ĐĂNG XUẤT -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
-              <Button android:id="@+id/btnReset" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:backgroundTint="#FFC2D1" app:backgroundTint="#FFC2D1" app:cornerRadius="21dp" android:text="Làm mới" android:textColor="#000000" android:textSize="11sp" android:textStyle="bold" />
-              <Button android:id="@+id/btnReload" android:layout_width="0dp" android:layout_height="42dp" android:layout_marginStart="6dp" android:layout_weight="1" android:backgroundTint="#F0F0F0" app:backgroundTint="#F0F0F0" app:cornerRadius="21dp" android:text="Tải lại" android:textColor="#000000" android:textSize="11sp" android:textStyle="bold" />
-              <Button android:id="@+id/btnLogout" android:layout_width="0dp" android:layout_height="42dp" android:layout_marginStart="6dp" android:layout_weight="1" android:backgroundTint="#C2185B" app:backgroundTint="#C2185B" app:cornerRadius="21dp" android:text="Đăng xuất" android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold" />
+        </ScrollView>
+
+        <!-- TAB 3: CÁ NHÂN (PROFILE) -->
+        <ScrollView android:id="@+id/layoutProfile" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cá nhân" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@mipmap/ic_launcher"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="16dp" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chủ sân Host" android:textColor="@color/text_white" android:textSize="18sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Host • Hệ thống" android:textColor="@color/text_gray" android:textSize="14sp"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="vertical" android:layout_marginBottom="16dp">
+                    <Button android:id="@+id/btnManageShuttleStock" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Quản lý kho cầu" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/stroke_color"/>
+                    <Button android:id="@+id/btnViewRevenueReport" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Báo cáo doanh thu" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/stroke_color"/>
+                    <Button android:id="@+id/btnSaveSessionReport" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Chốt lưu buổi đánh" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+                </LinearLayout>
+
+                <Button android:id="@+id/btnLogout" android:layout_width="match_parent" android:layout_height="54dp" android:background="@drawable/bg_btn_secondary" android:textColor="@color/brand_pink" android:text="Đăng xuất"/>
+                
+                <!-- Hidden Stats components to prevent crash -->
+                <TextView android:id="@+id/tvStatsOverview" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+                <TextView android:id="@+id/tvTopPlayers" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
             </LinearLayout>
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- 🏟️ CARD KẾT QUẢ XẾP TRẬN ĐẤU SÂN -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="2dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" Trận Đấu Tiếp Theo Trên Sân" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tvMatchResult" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="#FFF5F8" android:lineSpacingExtra="4dp" android:padding="14dp" android:text="Bấm 'Xếp Tự Động' hoặc 'Xếp Thủ Công' để tạo danh sách trận tiếp theo..." android:textColor="#000000" android:textSize="13sp" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- 👥 CARD DANH SÁCH CẦU THỦ (KHÔNG DÙNG LISTVIEW ĐỂ VUỐT SIÊU MƯỢT) -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="2dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text= "Danh Sách Cầu Thủ (Chạm vào tên để tùy chỉnh)" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <LinearLayout android:id="@+id/layoutPlayerListContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="vertical" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-      </LinearLayout>
-    </ScrollView>
-    <!-- ================= TAB 2: CHI PHÍ & THỐNG KÊ ================= -->
-    <ScrollView android:id="@+id/layoutExpenseStats" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingLeft="14dp" android:paddingTop="36dp" android:paddingRight="14dp" android:paddingBottom="12dp" android:visibility="gone">
-      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:paddingTop="8dp" android:paddingBottom="16dp" android:text="Quản Lý Chi Phí &amp; Thống Kê" android:textColor="#000000" android:textSize="20sp" android:textStyle="bold" />
-        <!-- CARD 1: CẤU HÌNH CHI PHÍ BUỔI ĐÁNH -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="3dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" Nhập Chi Phí Buổi Đánh (VNĐ)" android:textColor="#E65C82" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Tiền thuê sân:" android:textColor="#000000" android:textStyle="bold" />
-            <EditText android:id="@+id/etCourtFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: 300000" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            <!-- HÀNG KHO CẦU -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="center_vertical" android:orientation="horizontal">
-              <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền mua cầu:" android:textColor="#000000" android:textStyle="bold" />
-              <Button android:id="@+id/btnManageShuttleStock" android:layout_width="wrap_content" android:layout_height="38dp" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="19dp" android:paddingLeft="12dp" android:paddingRight="12dp" android:text="Nhập khoa cầu" android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold" />
-            </LinearLayout>
-            <CheckBox android:id="@+id/cbUseInventoryShuttle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Dùng cầu trong kho (Tự tính tiền theo số trái)" android:textColor="#E65C82" android:textSize="13sp" android:textStyle="bold" />
-            <LinearLayout android:id="@+id/layoutInventoryShuttleCalc" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-              <TextView android:id="@+id/tvStockStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Kho cầu: Chưa nhập kho" android:textColor="#E65C82" android:textSize="12sp" />
-              <EditText android:id="@+id/etShuttlesUsed" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@android:drawable/editbox_background" android:hint="Số trái cầu sử dụng buổi này (VD: 8)" android:inputType="number" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            </LinearLayout>
-            <EditText android:id="@+id/etShuttleFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@android:drawable/editbox_background" android:hint="Số tiền cầu (Ví dụ: 200000)" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Chi phí khác (Nước uống, phụ phí...):" android:textColor="#000000" android:textStyle="bold" />
-            <EditText android:id="@+id/etOtherFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: 50000" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            <!-- TÙY CHỌN 1: MỨC THU CỐ ĐỊNH CHUNG -->
-            <CheckBox android:id="@+id/cbFixedFeeMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Đặt mức thu cố định (Đồng giá)" android:textColor="#E65C82" android:textSize="13sp" android:textStyle="bold" />
-            <LinearLayout android:id="@+id/layoutFixedFeeInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Mức thu cố định mỗi người (VNĐ):" android:textColor="#000000" android:textStyle="bold" />
-              <EditText android:id="@+id/etFixedFeePerPlayer" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: 50000" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            </LinearLayout>
-            <!-- TÙY CHỌN 2: THU PHÍ RIÊNG NAM NỮ -->
-            <CheckBox android:id="@+id/cbSeparateGenderFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Thu phí riêng Nam &amp; Nữ" android:textColor="#E65C82" android:textSize="13sp" android:textStyle="bold" />
-            <LinearLayout android:id="@+id/layoutSeparateGenderInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
-              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Mức thu Nam (VNĐ/người):" android:textColor="#000000" android:textStyle="bold" />
-              <EditText android:id="@+id/etMaleFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: 60000" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Mức thu Nữ (VNĐ/người):" android:textColor="#000000" android:textStyle="bold" />
-              <EditText android:id="@+id/etFemaleFee" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: 40000" android:inputType="numberDecimal" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            </LinearLayout>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Ảnh Mã QR Ngân Hàng (Chuyển khoản nhanh):" android:textColor="#000000" android:textStyle="bold" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
-              <Button android:id="@+id/btnSelectQrCode" android:layout_width="wrap_content" android:layout_height="38dp" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="19dp" android:paddingLeft="12dp" android:paddingRight="12dp" android:text="Chọn ảnh QR" android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold" />
-              <ImageView android:id="@+id/ivQrCodePreview" android:layout_width="50dp" android:layout_height="50dp" android:layout_marginStart="12dp" android:background="#E0E0E0" android:scaleType="centerCrop" android:visibility="gone" />
-            </LinearLayout>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Ghi chú thêm (nếu có):" android:textColor="#000000" android:textStyle="bold" />
-            <EditText android:id="@+id/etExpenseNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@android:drawable/editbox_background" android:hint="Ví dụ: VCB 123456789 - Nguyen Van A" android:inputType="textMultiLine" android:padding="12dp" android:textColor="#000000" android:textColorHint="#757575" android:textSize="14sp" />
-            <Button android:id="@+id/btnSaveAndCalculate" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="14dp" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="24dp" android:text="Lưu Chi Phí &amp; Tính Tiền Chia" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- CARD 2: KẾT QUẢ CHIA TIỀN -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="3dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" Kết Quả Chia Tiền Buổi Đánh" android:textColor="#E65C82" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tvTotalExpense" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Tổng chi phí: 0 VNĐ" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tvPlayerCountSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Số người tham gia chia: 0 người" android:textColor="#000000" android:textSize="14sp" />
-            <TextView android:id="@+id/tvCostPerPlayer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="#FFE5EC" android:padding="12dp" android:text="Mỗi người cần đóng: 0 VNĐ" android:textColor="#E65C82" android:textSize="16sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tvGenderBreakdown" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Chi tiết Nam/Nữ: Chưa có" android:textColor="#000000" android:textSize="13sp" android:visibility="gone" />
-            <TextView android:id="@+id/tvHostBalance" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Chênh lệch thu chi (Host): 0 VNĐ" android:textColor="#000000" android:textSize="14sp" android:textStyle="bold" android:visibility="gone" />
-            <Button android:id="@+id/btnShareExpenseReport" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="12dp" android:backgroundTint="#FF7096" app:backgroundTint="#FF7096" app:cornerRadius="24dp" android:text="Chia sẻ / Sao chéo báo cáo" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
-              <Button android:id="@+id/btnSaveSessionReport" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:backgroundTint="#FFB3C6" app:backgroundTint="#FFB3C6" app:cornerRadius="22dp" android:text="Chốt và Lưu" android:textColor="#000000" android:textSize="11sp" android:textStyle="bold" />
-              <Button android:id="@+id/btnViewRevenueReport" android:layout_width="0dp" android:layout_height="44dp" android:layout_marginStart="6dp" android:layout_weight="1" android:backgroundTint="#E65C82" app:backgroundTint="#E65C82" app:cornerRadius="22dp" android:text="Báo cáo Doanh Thu" android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold" />
-            </LinearLayout>
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- CARD 3: THỐNG KÊ BUỔI ĐẤU -->
-        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="24dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="16dp" app:cardElevation="3dp">
-          <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" Thống Kê Buổi Đấu Cầu Lông" android:textColor="#E65C82" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tvStatsOverview" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:lineSpacingExtra="4dp" android:text="Đang tải dữ liệu thống kê..." android:textColor="#000000" android:textSize="14sp" />
-            <TextView android:id="@+id/tvTopPlayers" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:background="#FFE5EC" android:padding="12dp" android:text="Cầu thủ thi đấu nhiều nhất: Chưa có" android:textColor="#E65C82" android:textSize="14sp" android:textStyle="bold" />
-          </LinearLayout>
-        </androidx.cardview.widget.CardView>
-      </LinearLayout>
-    </ScrollView>
-  </FrameLayout>
-  <!-- 🟢 THANH ĐIỀU HƯỚNG DƯỚI (BOTTOM NAVIGATION BAR TỐI GIẢN) -->
-  <LinearLayout android:id="@+id/bottomNavigationView" android:layout_width="match_parent" android:layout_height="60dp" android:background="#FFFFFF" android:elevation="8dp" android:orientation="horizontal">
-    <LinearLayout android:id="@+id/btnTabHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:clickable="true" android:focusable="true" android:gravity="center" android:orientation="vertical">
-      <TextView android:id="@+id/tvTabHomeText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trang Chủ" android:textColor="#E65C82" android:textSize="12sp" android:textStyle="bold" />
+        </ScrollView>
+    </FrameLayout>
+
+    <!-- BOTTOM NAVIGATION -->
+    <LinearLayout android:id="@+id/bottomNav" android:layout_width="match_parent" android:layout_height="70dp" android:layout_alignParentBottom="true" android:background="@drawable/bg_bottom_nav" android:orientation="horizontal" android:elevation="16dp">
+        <LinearLayout android:id="@+id/btnTabHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:id="@+id/ivTabHome" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_home" app:tint="@color/text_gray"/>
+            <TextView android:id="@+id/tvTabHomeText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trang chủ" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btnTabExpense" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:id="@+id/ivTabExpense" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_expense" app:tint="@color/text_gray"/>
+            <TextView android:id="@+id/tvTabExpenseText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi phí" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btnTabMembers" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:id="@+id/ivTabMembers" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_members" app:tint="@color/text_gray"/>
+            <TextView android:id="@+id/tvTabMembersText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thành viên" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btnTabProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:id="@+id/ivTabProfile" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile" app:tint="@color/text_gray"/>
+            <TextView android:id="@+id/tvTabProfileText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cá nhân" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+        </LinearLayout>
     </LinearLayout>
-    <LinearLayout android:id="@+id/btnTabExpense" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:clickable="true" android:focusable="true" android:gravity="center" android:orientation="vertical">
-      <TextView android:id="@+id/tvTabExpenseText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi Phí &amp; Thống Kê" android:textColor="#757575" android:textSize="12sp" />
-    </LinearLayout>
-  </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

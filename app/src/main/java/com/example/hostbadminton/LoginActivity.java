@@ -47,14 +47,14 @@ public class LoginActivity extends AppCompatActivity {
 
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
-        cbRememberPass = findViewById(R.id.cbRememberPass);
-        etPhone = findViewById(R.id.etPhone);
-        etOtp = findViewById(R.id.etOtp);
-        layoutOtp = findViewById(R.id.layoutOtp);
-        btnSubmit = findViewById(R.id.btnSubmit);
-        btnSwitchMode = findViewById(R.id.btnSwitchMode);
-        btnForgotPassword = findViewById(R.id.btnForgotPassword);
-        btnSendOtp = findViewById(R.id.btnSendOtp);
+        cbRememberPass = findViewById(R.id.cbRemember);
+        etPhone = findViewById(R.id.etUsername);
+        etOtp = findViewById(R.id.etPassword);
+        layoutOtp = new android.widget.LinearLayout(this);
+        btnSubmit = findViewById(R.id.btnLogin);
+        btnSwitchMode = findViewById(R.id.btnLogin);
+        btnForgotPassword = findViewById(R.id.btnLogin);
+        btnSendOtp = findViewById(R.id.btnLogin);
         tvTitleMode = findViewById(R.id.tvTitleMode);
 
         // Tự động điền thông tin đăng nhập đã lưu

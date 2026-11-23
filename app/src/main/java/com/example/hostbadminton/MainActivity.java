@@ -49,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutPlayerListContainer;
 
     // Các thành phần Tab Bottom Navigation
-    private View layoutHome, layoutExpenseStats;
-    private LinearLayout btnTabHome, btnTabExpense;
+    private View layoutHome, layoutExpenseStats, layoutMembers, layoutProfile;
+    private LinearLayout btnTabHome, btnTabExpense, btnTabMembers, btnTabProfile;
     private TextView tvTabHomeText, tvTabExpenseText;
 
     // Các thành phần màn hình Chi Phí & Thống Kê
@@ -84,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         // Ánh xạ View Tab
         layoutHome = findViewById(R.id.layoutHome);
         layoutExpenseStats = findViewById(R.id.layoutExpenseStats);
+        layoutMembers = findViewById(R.id.layoutMembers);
+        layoutProfile = findViewById(R.id.layoutProfile);
+        btnTabMembers = findViewById(R.id.btnTabMembers);
+        btnTabProfile = findViewById(R.id.btnTabProfile);
         btnTabHome = findViewById(R.id.btnTabHome);
         btnTabExpense = findViewById(R.id.btnTabExpense);
         tvTabHomeText = findViewById(R.id.tvTabHomeText);

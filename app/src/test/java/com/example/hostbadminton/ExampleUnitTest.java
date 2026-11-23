@@ -15,37 +15,21 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void fixMessengerShareTextDrop() throws Exception {
-        String javaPath = "src/main/java/com/example/hostbadminton/MainActivity.java";
-        if (!new File(javaPath).exists()) javaPath = "app/src/main/java/com/example/hostbadminton/MainActivity.java";
+    public void removeBOMFromLoginActivityFinal() throws Exception {
+        String javaPath = "src/main/java/com/example/hostbadminton/LoginActivity.java";
+        if (!new File(javaPath).exists()) javaPath = "app/src/main/java/com/example/hostbadminton/LoginActivity.java";
 
         if (new File(javaPath).exists()) {
-            String content = new String(Files.readAllBytes(Paths.get(javaPath)), StandardCharsets.UTF_8);
-            content = content.replace("\r\n", "\n");
-
-            String oldCode = "                                        // ALWAYS auto copy to clipboard just in case the target app ignores EXTRA_TEXT\n" +
-                    "                                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);\n" +
-                    "                                        ClipData cd = ClipData.newPlainText(\"Báo Cáo\", reportText);\n" +
-                    "                                        if (cb != null) {\n" +
-                    "                                            cb.setPrimaryClip(cd);\n" +
-                    "                                        }\n" +
-                    "                                        \n" +
-                    "                                        Toast.makeText(MainActivity.this, \"Đã tự động sao chép văn bản. Vui lòng DÁN (Paste) để gửi kèm ảnh!\", Toast.LENGTH_LONG).show();";
-
-            String newCode = "                                        // ĐẶC TRỊ MESSENGER & ZALO: \n" +
-                    "                                        // Cố tình đẩy thẳng text vào clipboard, không để app tự quyết định\n" +
-                    "                                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);\n" +
-                    "                                        ClipData cd = ClipData.newPlainText(\"Báo Cáo\", reportText);\n" +
-                    "                                        if (cb != null) {\n" +
-                    "                                            cb.setPrimaryClip(cd);\n" +
-                    "                                        }\n" +
-                    "                                        \n" +
-                    "                                        Toast.makeText(MainActivity.this, \"HÃY BẤM DÁN (PASTE) CHỮ VÀO TIN NHẮN!\", Toast.LENGTH_LONG).show();";
-
-            if (content.contains(oldCode)) {
-                content = content.replace(oldCode, newCode);
-                Files.write(Paths.get(javaPath), content.getBytes(StandardCharsets.UTF_8));
+            byte[] bytes = Files.readAllBytes(Paths.get(javaPath));
+            // Ensure no BOM
+            if (bytes.length >= 3 && bytes[0] == (byte)0xEF && bytes[1] == (byte)0xBB && bytes[2] == (byte)0xBF) {
+                byte[] newBytes = new byte[bytes.length - 3];
+                System.arraycopy(bytes, 3, newBytes, 0, newBytes.length);
+                Files.write(Paths.get(javaPath), newBytes);
             }
+            String content = new String(Files.readAllBytes(Paths.get(javaPath)), StandardCharsets.UTF_8);
+            content = content.replace("\uFEFF", "");
+            Files.write(Paths.get(javaPath), content.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

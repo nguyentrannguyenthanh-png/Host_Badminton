@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tông màu Hồng Sữa - Trắng - Chữ Đen -->
-    <color name="milk_pink_bg">#FFF0F4</color>
-    <color name="milk_pink_card_bg">#FFFFFF</color>
-    <color name="milk_pink_primary">#FF7096</color>
-    <color name="milk_pink_secondary">#FFB3C6</color>
-    <color name="milk_pink_soft">#FFE5EC</color>
-    <color name="milk_pink_dark">#E65C82</color>
-
-    <color name="text_black_primary">#000000</color>
-    <color name="text_black_secondary">#222222</color>
-    <color name="text_hint_gray">#757575</color>
-
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="dark_bg">#131B2A</color>
+    <color name="dark_card">#1E2738</color>
+    <color name="dark_input">#1A2233</color>
+    <color name="neon_green">#4DF197</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#8A94A6</color>
+    <color name="stroke_color">#2C3647</color>
+    <color name="brand_pink">#E65C82</color>
+    <color name="transparent">#00000000</color>
+    <color name="neon_bg">#102D26</color>
 </resources>
