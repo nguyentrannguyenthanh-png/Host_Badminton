@@ -17,17 +17,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.Random;
-
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etUsername, etPassword, etPhone, etOtp;
+    private EditText etUsername, etPassword, etPhone;
     private CheckBox cbRememberPass;
-    private Button btnSubmit, btnSwitchMode, btnForgotPassword, btnSendOtp;
-    private LinearLayout layoutOtp;
+    private Button btnSubmit, btnSwitchMode, btnForgotPassword;
+    private LinearLayout layoutRegisterFields;
     private TextView tvTitleMode;
     private boolean isLoginMode = true;
-    private String sentOtp = null;
 
     private DatabaseHelper dbHelper;
     private SharedPreferences sharedPreferences;
@@ -48,27 +45,14 @@ public class LoginActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
         cbRememberPass = findViewById(R.id.cbRemember);
-        etPhone = findViewById(R.id.etUsername);
-        etOtp = findViewById(R.id.etPassword);
-        layoutOtp = new android.widget.LinearLayout(this);
+        etPhone = findViewById(R.id.etPhone);
+        layoutRegisterFields = findViewById(R.id.layoutRegisterFields);
         btnSubmit = findViewById(R.id.btnLogin);
-        btnSwitchMode = findViewById(R.id.btnLogin);
-        btnForgotPassword = findViewById(R.id.btnLogin);
-        btnSendOtp = findViewById(R.id.btnLogin);
+        btnSwitchMode = findViewById(R.id.btnSwitchMode);
+        btnForgotPassword = findViewById(R.id.btnForgotPassword);
         tvTitleMode = findViewById(R.id.tvTitleMode);
 
-        // Tự động điền thông tin đăng nhập đã lưu
         loadSavedCredentials();
-
-        btnSendOtp.setOnClickListener(v -> {
-            String phone = etPhone.getText().toString().trim();
-            if (phone.isEmpty() || phone.length() < 9) {
-                showTopToast("Vui lòng nhập số điện thoại hợp lệ để nhận mã OTP!");
-                return;
-            }
-            sentOtp = String.valueOf(100000 + new Random().nextInt(900000));
-            showTopToast("Mã OTP xác minh của bạn là: " + sentOtp);
-        });
 
         btnSubmit.setOnClickListener(v -> {
             String user = etUsername.getText().toString().trim();
@@ -82,7 +66,6 @@ public class LoginActivity extends AppCompatActivity {
             if (isLoginMode) {
                 boolean isValid = dbHelper.checkUser(user, pass);
                 if (isValid) {
-                    // Lưu thông tin ghi nhớ đăng nhập
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     if (cbRememberPass.isChecked()) {
                         editor.putBoolean(KEY_REMEMBER, true);
@@ -100,15 +83,9 @@ public class LoginActivity extends AppCompatActivity {
                     showTopToast("Tài khoản không tồn tại hoặc mật khẩu không đúng!");
                 }
             } else {
-                String phone = etPhone.getText().toString().trim();
-                String otpInput = etOtp.getText().toString().trim();
-
+                String phone = etPhone != null ? etPhone.getText().toString().trim() : "";
                 if (phone.isEmpty()) {
                     showTopToast("Vui lòng nhập số điện thoại!");
-                    return;
-                }
-                if (sentOtp == null || !sentOtp.equals(otpInput)) {
-                    showTopToast("Mã OTP không chính xác hoặc chưa được gửi/xác minh!");
                     return;
                 }
                 if (dbHelper.isUserExists(user)) {
@@ -122,9 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                     isLoginMode = true;
                     updateModeUI();
                     etPassword.setText("");
-                    etPhone.setText("");
-                    etOtp.setText("");
-                    sentOtp = null;
+                    if (etPhone != null) etPhone.setText("");
                 } else {
                     showTopToast("Đăng ký thất bại, vui lòng thử lại!");
                 }
@@ -152,133 +127,89 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateModeUI() {
         if (isLoginMode) {
-            tvTitleMode.setText("Đăng Nhập Tài Khoản Chủ Sân");
-            btnSubmit.setText("Đăng Nhập");
+            tvTitleMode.setText("ĐĂNG NHẬP TÀI KHOẢN CHỦ SÂN");
+            btnSubmit.setText("ĐĂNG NHẬP");
             btnSwitchMode.setText("Chưa có tài khoản? Đăng ký ngay");
-            etPhone.setVisibility(View.GONE);
-            layoutOtp.setVisibility(View.GONE);
+            if (layoutRegisterFields != null) layoutRegisterFields.setVisibility(View.GONE);
             cbRememberPass.setVisibility(View.VISIBLE);
         } else {
-            tvTitleMode.setText("Đăng Ký Tài Khoản Chủ Sân Mới");
-            btnSubmit.setText("Đăng Ký");
+            tvTitleMode.setText("ĐĂNG KÝ TÀI KHOẢN CHỦ SÂN MỚI");
+            btnSubmit.setText("ĐĂNG KÝ");
             btnSwitchMode.setText("Đã có tài khoản? Đăng nhập ngay");
-            etPhone.setVisibility(View.VISIBLE);
-            layoutOtp.setVisibility(View.VISIBLE);
+            if (layoutRegisterFields != null) layoutRegisterFields.setVisibility(View.VISIBLE);
             cbRememberPass.setVisibility(View.GONE);
         }
     }
-
-    private String forgotSentOtp = null;
 
     private void showForgotPasswordDialog() {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int padding = 32;
         layout.setPadding(padding, padding, padding, padding);
+        layout.setBackgroundColor(Color.parseColor("#1E2738"));
 
         EditText etUser = new EditText(this);
         etUser.setHint("Nhập tên tài khoản");
         etUser.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
-        etUser.setTextColor(Color.BLACK);
-        etUser.setHintTextColor(Color.parseColor("#757575"));
-
-        EditText etPhone = new EditText(this);
-        etPhone.setHint("Nhập số điện thoại đã đăng ký");
-        etPhone.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
-        etPhone.setTextColor(Color.BLACK);
-        etPhone.setHintTextColor(Color.parseColor("#757575"));
-
-        LinearLayout layoutOtpBox = new LinearLayout(this);
-        layoutOtpBox.setOrientation(LinearLayout.HORIZONTAL);
-
-        EditText etOtp = new EditText(this);
-        etOtp.setHint("Mã OTP (6 số)");
-        etOtp.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        etOtp.setTextColor(Color.BLACK);
-        etOtp.setHintTextColor(Color.parseColor("#757575"));
-        LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        etOtp.setLayoutParams(p1);
-
-        Button btnSendOtp = new Button(this);
-        btnSendOtp.setText("Gửi Mã");
-        btnSendOtp.setBackgroundColor(Color.parseColor("#FF7096"));
-        btnSendOtp.setTextColor(Color.WHITE);
-        btnSendOtp.setTypeface(null, Typeface.BOLD);
-
-        btnSendOtp.setOnClickListener(v -> {
-            String user = etUser.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            if (user.isEmpty() || phone.isEmpty()) {
-                showTopToast("Vui lòng nhập tài khoản và số điện thoại trước!");
-                return;
-            }
-            if (dbHelper.checkUserPhone(user, phone)) {
-                forgotSentOtp = String.valueOf(100000 + new Random().nextInt(900000));
-                showTopToast("Mã OTP khôi phục của bạn là: " + forgotSentOtp);
-            } else {
-                showTopToast("Tài khoản hoặc số điện thoại không khớp trong hệ thống!");
-            }
-        });
-
-        layoutOtpBox.addView(etOtp);
-        layoutOtpBox.addView(btnSendOtp);
+        etUser.setTextColor(Color.WHITE);
+        etUser.setHintTextColor(Color.parseColor("#8A94A6"));
+        etUser.setBackgroundColor(Color.parseColor("#1A2233"));
+        etUser.setPadding(24, 24, 24, 24);
 
         EditText etNewPass = new EditText(this);
         etNewPass.setHint("Nhập mật khẩu mới");
         etNewPass.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD | android.text.InputType.TYPE_CLASS_TEXT);
-        etNewPass.setTextColor(Color.BLACK);
-        etNewPass.setHintTextColor(Color.parseColor("#757575"));
+        etNewPass.setTextColor(Color.WHITE);
+        etNewPass.setHintTextColor(Color.parseColor("#8A94A6"));
+        etNewPass.setBackgroundColor(Color.parseColor("#1A2233"));
+        etNewPass.setPadding(24, 24, 24, 24);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 16, 0, 16);
+        etUser.setLayoutParams(lp);
+        etNewPass.setLayoutParams(lp);
 
         layout.addView(etUser);
-        layout.addView(etPhone);
-        layout.addView(layoutOtpBox);
         layout.addView(etNewPass);
 
         ScrollView scrollView = new ScrollView(this);
         scrollView.addView(layout);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Khôi Phục Mật Khẩu qua OTP")
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Khôi Phục Mật Khẩu")
                 .setView(scrollView)
-                .setPositiveButton("Xác Nhận Đổi Mật Khẩu", (d, which) -> {
+                .setPositiveButton("Xác Nhận", (d, which) -> {
                     String user = etUser.getText().toString().trim();
-                    String phone = etPhone.getText().toString().trim();
-                    String otpInput = etOtp.getText().toString().trim();
                     String newPass = etNewPass.getText().toString().trim();
 
-                    if (user.isEmpty() || phone.isEmpty() || otpInput.isEmpty() || newPass.isEmpty()) {
+                    if (user.isEmpty() || newPass.isEmpty()) {
                         showTopToast("Vui lòng điền đầy đủ tất cả các trường!");
                         return;
                     }
 
-                    if (forgotSentOtp == null || !forgotSentOtp.equals(otpInput)) {
-                        showTopToast("Mã OTP không chính xác hoặc chưa được gửi/xác minh!");
-                        return;
-                    }
-
-                    if (dbHelper.checkUserPhone(user, phone)) {
+                    if (dbHelper.isUserExists(user)) {
                         dbHelper.updatePassword(user, newPass);
                         showTopToast("Đổi mật khẩu thành công! Hãy đăng nhập lại.");
-                        forgotSentOtp = null;
                     } else {
-                        showTopToast("Xác thực tài khoản thất bại!");
+                        showTopToast("Tài khoản không tồn tại!");
                     }
                 })
-                .setNegativeButton("Hủy", null)
-                .create();
+                .setNegativeButton("Hủy", null);
 
-        dialog.show();
-
-        // Đồng bộ chữ đen cho nút bấm AlertDialog
-        Button posBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        if (posBtn != null) {
-            posBtn.setTextColor(Color.BLACK);
-            posBtn.setTypeface(null, Typeface.BOLD);
-        }
-        Button negBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        if (negBtn != null) {
-            negBtn.setTextColor(Color.BLACK);
-        }
+        AlertDialog dlg = builder.create();
+        dlg.setOnShowListener(d -> {
+            dlg.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.parseColor("#1E2738")));
+            Button posBtn = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (posBtn != null) {
+                posBtn.setTextColor(Color.parseColor("#4DF197"));
+                posBtn.setTypeface(null, Typeface.BOLD);
+            }
+            Button negBtn = dlg.getButton(AlertDialog.BUTTON_NEGATIVE);
+            if (negBtn != null) {
+                negBtn.setTextColor(Color.parseColor("#8A94A6"));
+            }
+        });
+        dlg.show();
     }
 
     private void showTopToast(String message) {

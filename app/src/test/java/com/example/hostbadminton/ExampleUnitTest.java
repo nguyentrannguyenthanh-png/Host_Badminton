@@ -15,21 +15,19 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void removeBOMFromLoginActivityFinal() throws Exception {
-        String javaPath = "src/main/java/com/example/hostbadminton/LoginActivity.java";
-        if (!new File(javaPath).exists()) javaPath = "app/src/main/java/com/example/hostbadminton/LoginActivity.java";
+    public void fixManualMatchDirect() throws Exception {
+        File f = new File("S:/Host_Badminton-main/Host_Badminton-main/app/src/main/java/com/example/hostbadminton/MainActivity.java");
+        if (!f.exists()) f = new File("app/src/main/java/com/example/hostbadminton/MainActivity.java");
 
-        if (new File(javaPath).exists()) {
-            byte[] bytes = Files.readAllBytes(Paths.get(javaPath));
-            // Ensure no BOM
-            if (bytes.length >= 3 && bytes[0] == (byte)0xEF && bytes[1] == (byte)0xBB && bytes[2] == (byte)0xBF) {
-                byte[] newBytes = new byte[bytes.length - 3];
-                System.arraycopy(bytes, 3, newBytes, 0, newBytes.length);
-                Files.write(Paths.get(javaPath), newBytes);
+        if (f.exists()) {
+            String content = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+            content = content.replace("\r\n", "\n");
+
+            int idx = content.indexOf("displayMatchesOnCourts(matches, availablePlayers.size(), restingCount);");
+            if (idx != -1) {
+                content = content.substring(0, idx) + "displaySingleMatchOnCourt(match, p1, p2, p3, p4);" + content.substring(idx + "displayMatchesOnCourts(matches, availablePlayers.size(), restingCount);".length());
+                Files.write(f.toPath(), content.getBytes(StandardCharsets.UTF_8));
             }
-            String content = new String(Files.readAllBytes(Paths.get(javaPath)), StandardCharsets.UTF_8);
-            content = content.replace("\uFEFF", "");
-            Files.write(Paths.get(javaPath), content.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

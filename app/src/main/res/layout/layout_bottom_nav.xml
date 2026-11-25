@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomNav"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:layout_alignParentBottom="true"
+    android:background="@drawable/bg_bottom_nav"
+    android:orientation="horizontal"
+    android:elevation="16dp">
+    <LinearLayout android:id="@+id/btnTabHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+        <ImageView android:id="@+id/ivTabHome" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_home" app:tint="@color/neon_green"/>
+        <TextView android:id="@+id/tvTabHomeText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trang chủ" android:textColor="@color/neon_green" android:textSize="12sp" android:layout_marginTop="4dp"/>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/btnTabMembers" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+        <ImageView android:id="@+id/ivTabMembers" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_members" app:tint="@color/text_gray"/>
+        <TextView android:id="@+id/tvTabMembersText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thành viên" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/btnTabExpense" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+        <ImageView android:id="@+id/ivTabExpense" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_expense" app:tint="@color/text_gray"/>
+        <TextView android:id="@+id/tvTabExpenseText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi phí" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/btnTabProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+        <ImageView android:id="@+id/ivTabProfile" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile" app:tint="@color/text_gray"/>
+        <TextView android:id="@+id/tvTabProfileText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cá nhân" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</LinearLayout>

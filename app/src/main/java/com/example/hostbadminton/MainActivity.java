@@ -445,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 historyManager.nextRound();
-                tvMatchResult.setText(sb.toString().trim());
+                displaySingleMatchOnCourt(match, p1, p2, p3, p4);
                 savePlayersToPrefs();
                 updatePlayerListUI();
 
@@ -1829,7 +1829,7 @@ public class MainActivity extends AppCompatActivity {
             currentRoundRecords.add(rec);
             historyManager.nextRound();
 
-            tvMatchResult.setText(sb.toString().trim());
+            displaySingleMatchOnCourt(match, p1, p2, p3, p4);
             savePlayersToPrefs();
             updatePlayerListUI();
 
@@ -1869,6 +1869,73 @@ public class MainActivity extends AppCompatActivity {
                     .edit().putString("qr_code_uri", qrCodeUri.toString()).apply();
                 Toast.makeText(this, "Đã chọn ảnh mã QR ngân hàng thành công!", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    private void displayMatchesOnCourts(List<MatchOption> matches, int totalAvailable, int restingCount) {
+        LinearLayout courtContainer = findViewById(R.id.layoutCourtContainer);
+        TextView tvSummary = findViewById(R.id.tvMatchResultSummary);
+
+        if (courtContainer != null) {
+            courtContainer.removeAllViews();
+        }
+
+        if (tvSummary != null) {
+            tvSummary.setText("Tá»•ng kháº£ dá»¥ng: " + totalAvailable + " ngÆ°á»i -> Xáº¿p " + matches.size() + " sÃ¢n (" + (matches.size() * 4) + " ngÆ°á»i Ä‘Ã¡nh, " + restingCount + " ngÆ°á»i nghá»‰ xoay vÃ²ng)");
+        }
+
+        for (int i = 0; i < matches.size(); i++) {
+            MatchOption match = matches.get(i);
+            int courtNum = i + 1;
+
+            View cardView = getLayoutInflater().inflate(R.layout.item_court_match, courtContainer, false);
+            TextView tvTitle = cardView.findViewById(R.id.tvCourtTitle);
+            TextView tvTeam1 = cardView.findViewById(R.id.tvTeam1);
+            TextView tvTeam2 = cardView.findViewById(R.id.tvTeam2);
+            TextView tvMeta = cardView.findViewById(R.id.tvMatchMeta);
+
+            if (tvTitle != null) tvTitle.setText("SÃ‚N " + courtNum);
+            if (tvTeam1 != null) {
+                tvTeam1.setText(match.getTeam1().first.getName() + " & " + match.getTeam1().second.getName());
+            }
+            if (tvTeam2 != null) {
+                tvTeam2.setText(match.getTeam2().first.getName() + " & " + match.getTeam2().second.getName());
+            }
+            if (tvMeta != null) {
+                String genderInfo = match.getGenderDiff() == 0 ? "Tá»‘t" : "Lá»‡ch " + (int)match.getGenderDiff();
+                tvMeta.setText("Lá»‡ch trÃ¬nh: " + String.format("%.2f", match.getSkillDiff()) + " | Nam/Ná»¯: " + genderInfo);
+            }
+
+            if (courtContainer != null) {
+                courtContainer.addView(cardView);
+            }
+        }
+    }
+
+    private void displaySingleMatchOnCourt(MatchOption match, Player p1, Player p2, Player p3, Player p4) {
+        LinearLayout courtContainer = findViewById(R.id.layoutCourtContainer);
+        TextView tvSummary = findViewById(R.id.tvMatchResultSummary);
+
+        if (courtContainer != null) {
+            courtContainer.removeAllViews();
+        }
+        if (tvSummary != null) {
+            tvSummary.setText("Xáº¿p thá»§ cÃ´ng 1 sÃ¢n (4 ngÆ°á»i Ä‘Ã¡nh)");
+        }
+
+        View cardView = getLayoutInflater().inflate(R.layout.item_court_match, courtContainer, false);
+        TextView tvTitle = cardView.findViewById(R.id.tvCourtTitle);
+        TextView tvTeam1 = cardView.findViewById(R.id.tvTeam1);
+        TextView tvTeam2 = cardView.findViewById(R.id.tvTeam2);
+        TextView tvMeta = cardView.findViewById(R.id.tvMatchMeta);
+
+        if (tvTitle != null) tvTitle.setText("SÃ‚N 1 (THá»¦ CÃ”NG)");
+        if (tvTeam1 != null) tvTeam1.setText(p1.getName() + " & " + p2.getName());
+        if (tvTeam2 != null) tvTeam2.setText(p3.getName() + " & " + p4.getName());
+        if (tvMeta != null) tvMeta.setText("Lá»‡ch trÃ¬nh: " + String.format("%.2f", match.getSkillDiff()) + " | Lá»‹ch sá»­ pháº¡t: " + String.format("%.1f", match.getHistoryPenalty()));
+
+        if (courtContainer != null) {
+            courtContainer.addView(cardView);
         }
     }
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    android:paddingTop="60dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp" xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutProfile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" >
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cá nhân" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+        
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="horizontal"  android:gravity="center_vertical" android:layout_marginBottom="16dp">
+            <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@mipmap/ic_launcher_round"/>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="16dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chủ sân Host" android:textColor="@color/text_white" android:textSize="18sp" android:textStyle="bold"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Host • Hệ thống" android:textColor="@color/text_gray" android:textSize="14sp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="vertical" android:layout_marginBottom="16dp">
+            <Button android:id="@+id/btnManageShuttleStock" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Quản lý kho cầu" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/stroke_color"/>
+            <Button android:id="@+id/btnViewRevenueReport" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Báo cáo doanh thu" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/stroke_color"/>
+            <Button android:id="@+id/btnSaveSessionReport" android:layout_width="match_parent" android:layout_height="60dp" android:background="@color/transparent" android:gravity="start|center_vertical" android:text="Chốt lưu buổi đánh" android:textColor="@color/text_white" android:textAllCaps="false" android:paddingStart="16dp"/>
+        </LinearLayout>
+
+        <Button android:id="@+id/btnLogout" android:layout_width="match_parent" android:layout_height="54dp" android:background="@drawable/bg_btn_secondary" android:textColor="@color/brand_pink" android:text="Đăng xuất"/>
+        
+        <TextView android:id="@+id/tvStatsOverview" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <TextView android:id="@+id/tvTopPlayers" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    </LinearLayout>
+</ScrollView>

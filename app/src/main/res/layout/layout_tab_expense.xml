@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutExpenseStats"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="60dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:visibility="gone">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chi phí &amp; Thống kê" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tổng chi phí" android:textColor="@color/text_gray"/>
+        <TextView android:id="@+id/tvTotalExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0đ" android:textColor="@color/text_white" android:textSize="28sp" android:textStyle="bold"/>
+        <TextView android:id="@+id/tvPlayerCountSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Số người tham gia: 0" android:textColor="@color/text_gray" android:layout_marginBottom="16dp"/>
+        
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_neon" android:orientation="vertical" android:padding="16dp" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:id="@+id/tvCostPerPlayer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mỗi người đóng: 0đ" android:textColor="@color/text_white" android:textSize="16sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đã bao gồm tiền nước" android:textColor="@color/text_gray" android:textSize="12sp"/>
+                </LinearLayout>
+                <ImageView android:id="@+id/ivQrCodePreview" android:layout_width="48dp" android:layout_height="48dp" android:background="@color/white" android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền sân" android:textColor="@color/text_white"/>
+            <EditText android:id="@+id/etCourtFee" android:layout_width="150dp" android:layout_height="wrap_content" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:gravity="end" android:inputType="numberDecimal"/>
+        </LinearLayout>
+        
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="vertical" android:padding="16dp" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Tiền cầu" android:textColor="@color/text_white"/>
+                <EditText android:id="@+id/etShuttleFee" android:layout_width="150dp" android:layout_height="wrap_content" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:gravity="end" android:inputType="numberDecimal"/>
+            </LinearLayout>
+            <CheckBox android:id="@+id/cbUseInventoryShuttle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Dùng cầu trong kho (Tự tính theo số trái)" android:textColor="@color/neon_green" android:buttonTint="@color/neon_green" android:textSize="13sp"/>
+            <LinearLayout android:id="@+id/layoutInventoryShuttleCalc" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="8dp">
+                <TextView android:id="@+id/tvStockStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Kho cầu: Chưa nhập kho" android:textColor="@color/text_gray" android:textSize="12sp" android:layout_marginBottom="4dp"/>
+                <EditText android:id="@+id/etShuttlesUsed" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_input_dark" android:hint="Số trái cầu sử dụng (VD: 8)" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:inputType="number" android:padding="10dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hidden inputs -->
+        <EditText android:id="@+id/etOtherFee" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <EditText android:id="@+id/etExpenseNote" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <EditText android:id="@+id/etFixedFeePerPlayer" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <CheckBox android:id="@+id/cbFixedFeeMode" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <LinearLayout android:id="@+id/layoutFixedFeeInput" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <TextView android:id="@+id/tvGenderBreakdown" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <TextView android:id="@+id/tvHostBalance" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <Button android:id="@+id/btnSelectQrCode" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_card_dark" android:orientation="vertical" android:padding="16dp" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Thu riêng Nam / Nữ" android:textColor="@color/text_white"/>
+                <CheckBox android:id="@+id/cbSeparateGenderFee" android:layout_width="wrap_content" android:layout_height="wrap_content" android:buttonTint="@color/neon_green"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/layoutSeparateGenderInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp" android:visibility="gone">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nam:" android:textColor="@color/text_gray" android:layout_gravity="center_vertical"/>
+                <EditText android:id="@+id/etMaleFee" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:inputType="numberDecimal" android:layout_marginStart="8dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nữ:" android:textColor="@color/text_gray" android:layout_gravity="center_vertical" android:layout_marginStart="16dp"/>
+                <EditText android:id="@+id/etFemaleFee" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@color/transparent" android:hint="0đ" android:textColor="@color/text_white" android:textColorHint="@color/text_gray" android:inputType="numberDecimal" android:layout_marginStart="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <Button android:id="@+id/btnSaveAndCalculate" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1" android:backgroundTint="@color/neon_green" android:textColor="@color/dark_bg" android:text="Lưu &amp; Tính tiền" app:cornerRadius="27dp"/>
+            <Button android:id="@+id/btnShareExpenseReport" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1" android:layout_marginStart="12dp" android:background="@drawable/bg_btn_secondary" android:textColor="@color/neon_green" android:text="Chia sẻ Zalo" app:cornerRadius="27dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
