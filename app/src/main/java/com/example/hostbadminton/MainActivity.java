@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvTabHomeText, tvTabExpenseText;
 
     // Các thành phần màn hình Chi Phí & Thống Kê
+    private EditText etSearchPlayer;
     private EditText etCourtFee, etShuttleFee, etOtherFee, etExpenseNote, etFixedFeePerPlayer, etMaleFee, etFemaleFee, etShuttlesUsed;
     private CheckBox cbFixedFeeMode, cbSeparateGenderFee, cbUseInventoryShuttle;
     private LinearLayout layoutFixedFeeInput, layoutSeparateGenderInput, layoutInventoryShuttleCalc;
@@ -98,6 +99,16 @@ public class MainActivity extends AppCompatActivity {
         spinnerGender = findViewById(R.id.spinnerGender);
         spinnerSkill = findViewById(R.id.spinnerSkill);
         btnAddPlayer = findViewById(R.id.btnAddPlayer);
+        etSearchPlayer = findViewById(R.id.etSearchPlayer);
+        if (etSearchPlayer != null) {
+            etSearchPlayer.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    updatePlayerListUI();
+                }
+                @Override public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
         btnSuggestMatch = findViewById(R.id.btnSuggestMatch);
         btnManualMatch = findViewById(R.id.btnManualMatch);
         btnUndoMatch = findViewById(R.id.btnUndoMatch);
@@ -445,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 historyManager.nextRound();
-                displaySingleMatchOnCourt(match, p1, p2, p3, p4);
+                displayMatchesOnCourts(matches, availablePlayers.size(), restingCount);
                 savePlayersToPrefs();
                 updatePlayerListUI();
 
@@ -560,15 +571,35 @@ public class MainActivity extends AppCompatActivity {
         if (layoutPlayerListContainer == null) return;
         layoutPlayerListContainer.removeAllViews();
 
+        String keyword = etSearchPlayer != null ? etSearchPlayer.getText().toString().toLowerCase().trim() : "";
+
         for (int i = 0; i < playerList.size(); i++) {
             Player player = playerList.get(i);
             int position = i;
 
+            if (!keyword.isEmpty() && !player.getName().toLowerCase().contains(keyword)) {
+                continue;
+            }
+
             View view = getLayoutInflater().inflate(R.layout.item_player, layoutPlayerListContainer, false);
             TextView tvInfo = view.findViewById(R.id.tvPlayerInfo);
             TextView tvCount = view.findViewById(R.id.tvMatchCount);
+            TextView tvInitials = view.findViewById(R.id.tvPlayerInitials);
+            android.widget.Switch swStatus = view.findViewById(R.id.swPlayerStatus);
 
             if (player != null) {
+                if (tvInitials != null) {
+                    tvInitials.setText(getInitials(player.getName()));
+                }
+                if (swStatus != null) {
+                    swStatus.setOnCheckedChangeListener(null);
+                    swStatus.setChecked(!player.isResting());
+                    swStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                        player.setResting(!isChecked);
+                        savePlayersToPrefs();
+                        updatePlayerListUI();
+                    });
+                }
                 String statusText = player.isResting() ? " [ĐANG NGHỈ]" : "";
                 String prefText = "";
                 if (player.getPreferredTeammateId() != null) {
@@ -596,7 +627,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // --- DIALOG THIẾT LẬP NÉ NGƯỜI CHƠI ---
     private void showAvoidPlayerDialog(Player player) {
         List<Player> otherPlayers = new ArrayList<>();
         List<String> names = new ArrayList<>();
@@ -1872,6 +1902,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    
     private void displayMatchesOnCourts(List<MatchOption> matches, int totalAvailable, int restingCount) {
         LinearLayout courtContainer = findViewById(R.id.layoutCourtContainer);
         TextView tvSummary = findViewById(R.id.tvMatchResultSummary);
@@ -1881,7 +1912,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (tvSummary != null) {
-            tvSummary.setText("Tá»•ng kháº£ dá»¥ng: " + totalAvailable + " ngÆ°á»i -> Xáº¿p " + matches.size() + " sÃ¢n (" + (matches.size() * 4) + " ngÆ°á»i Ä‘Ã¡nh, " + restingCount + " ngÆ°á»i nghá»‰ xoay vÃ²ng)");
+            tvSummary.setText("Tong kha dung: " + totalAvailable + " nguoi -> Xep " + matches.size() + " san (" + (matches.size() * 4) + " nguoi danh, " + restingCount + " nguoi nghi xoay vong)");
         }
 
         for (int i = 0; i < matches.size(); i++) {
@@ -1894,7 +1925,7 @@ public class MainActivity extends AppCompatActivity {
             TextView tvTeam2 = cardView.findViewById(R.id.tvTeam2);
             TextView tvMeta = cardView.findViewById(R.id.tvMatchMeta);
 
-            if (tvTitle != null) tvTitle.setText("SÃ‚N " + courtNum);
+            if (tvTitle != null) tvTitle.setText("SAN " + courtNum);
             if (tvTeam1 != null) {
                 tvTeam1.setText(match.getTeam1().first.getName() + " & " + match.getTeam1().second.getName());
             }
@@ -1902,8 +1933,8 @@ public class MainActivity extends AppCompatActivity {
                 tvTeam2.setText(match.getTeam2().first.getName() + " & " + match.getTeam2().second.getName());
             }
             if (tvMeta != null) {
-                String genderInfo = match.getGenderDiff() == 0 ? "Tá»‘t" : "Lá»‡ch " + (int)match.getGenderDiff();
-                tvMeta.setText("Lá»‡ch trÃ¬nh: " + String.format("%.2f", match.getSkillDiff()) + " | Nam/Ná»¯: " + genderInfo);
+                String genderInfo = match.getGenderDiff() == 0 ? "Tot" : "Lech " + (int)match.getGenderDiff();
+                tvMeta.setText("Lech trinh: " + String.format("%.2f", match.getSkillDiff()) + " | Nam/Nu: " + genderInfo);
             }
 
             if (courtContainer != null) {
@@ -1920,7 +1951,7 @@ public class MainActivity extends AppCompatActivity {
             courtContainer.removeAllViews();
         }
         if (tvSummary != null) {
-            tvSummary.setText("Xáº¿p thá»§ cÃ´ng 1 sÃ¢n (4 ngÆ°á»i Ä‘Ã¡nh)");
+            tvSummary.setText("Xep thu cong 1 san (4 nguoi danh)");
         }
 
         View cardView = getLayoutInflater().inflate(R.layout.item_court_match, courtContainer, false);
@@ -1929,13 +1960,27 @@ public class MainActivity extends AppCompatActivity {
         TextView tvTeam2 = cardView.findViewById(R.id.tvTeam2);
         TextView tvMeta = cardView.findViewById(R.id.tvMatchMeta);
 
-        if (tvTitle != null) tvTitle.setText("SÃ‚N 1 (THá»¦ CÃ”NG)");
+        if (tvTitle != null) tvTitle.setText("SAN 1 (THU CONG)");
         if (tvTeam1 != null) tvTeam1.setText(p1.getName() + " & " + p2.getName());
         if (tvTeam2 != null) tvTeam2.setText(p3.getName() + " & " + p4.getName());
-        if (tvMeta != null) tvMeta.setText("Lá»‡ch trÃ¬nh: " + String.format("%.2f", match.getSkillDiff()) + " | Lá»‹ch sá»­ pháº¡t: " + String.format("%.1f", match.getHistoryPenalty()));
+        if (tvMeta != null) tvMeta.setText("Lech trinh: " + String.format("%.2f", match.getSkillDiff()) + " | Lich su phat: " + String.format("%.1f", match.getHistoryPenalty()));
 
         if (courtContainer != null) {
             courtContainer.addView(cardView);
         }
     }
+
+    private String getInitials(String name) {
+        if (name == null || name.trim().isEmpty()) return "PL";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length >= 2) {
+            String first = parts[0].substring(0, 1);
+            String last = parts[parts.length - 1].substring(0, 1);
+            return (first + last).toUpperCase();
+        } else if (parts[0].length() >= 2) {
+            return parts[0].substring(0, 2).toUpperCase();
+        }
+        return parts[0].toUpperCase();
+    }
+
 }
