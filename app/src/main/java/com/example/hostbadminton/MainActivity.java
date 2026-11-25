@@ -178,8 +178,10 @@ public class MainActivity extends AppCompatActivity {
         loadExpensesData();
 
         // Sự kiện chuyển Tab Bottom Navigation
-        btnTabHome.setOnClickListener(v -> switchTab(true));
-        btnTabExpense.setOnClickListener(v -> switchTab(false));
+        if (btnTabHome != null) btnTabHome.setOnClickListener(v -> switchTab(0));
+        if (btnTabMembers != null) btnTabMembers.setOnClickListener(v -> switchTab(1));
+        if (btnTabExpense != null) btnTabExpense.setOnClickListener(v -> switchTab(2));
+        if (btnTabProfile != null) btnTabProfile.setOnClickListener(v -> switchTab(3));
 
         // Sự kiện Quản lý Nhập Kho Cầu (Thêm / Sửa / Xóa)
         if (btnManageShuttleStock != null) {
@@ -975,29 +977,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // --- TAB SWITCHING LOGIC (MÀU HỒNG SỮA & CHỮ ĐEN) ---
-    private void switchTab(boolean isHomeSelected) {
-        if (isHomeSelected) {
-            layoutHome.setVisibility(View.VISIBLE);
-            layoutExpenseStats.setVisibility(View.GONE);
-            tvTabHomeText.setTextColor(Color.parseColor("#E65C82"));
-            tvTabHomeText.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvTabExpenseText.setTextColor(Color.parseColor("#757575"));
-            tvTabExpenseText.setTypeface(null, android.graphics.Typeface.NORMAL);
-        } else {
-            layoutHome.setVisibility(View.GONE);
-            layoutExpenseStats.setVisibility(View.VISIBLE);
-            tvTabExpenseText.setTextColor(Color.parseColor("#E65C82"));
-            tvTabExpenseText.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvTabHomeText.setTextColor(Color.parseColor("#757575"));
-            tvTabHomeText.setTypeface(null, android.graphics.Typeface.NORMAL);
+    private void switchTab(int tabIndex) {
+        if (layoutHome != null) layoutHome.setVisibility(tabIndex == 0 ? View.VISIBLE : View.GONE);
+        if (layoutMembers != null) layoutMembers.setVisibility(tabIndex == 1 ? View.VISIBLE : View.GONE);
+        if (layoutExpenseStats != null) layoutExpenseStats.setVisibility(tabIndex == 2 ? View.VISIBLE : View.GONE);
+        if (layoutProfile != null) layoutProfile.setVisibility(tabIndex == 3 ? View.VISIBLE : View.GONE);
+        
+        int colorActive = Color.parseColor("#4DF197");
+        int colorInactive = Color.parseColor("#8A94A6");
 
+        TextView tvHome = findViewById(R.id.tvTabHomeText);
+        TextView tvMembers = findViewById(R.id.tvTabMembersText);
+        TextView tvExpense = findViewById(R.id.tvTabExpenseText);
+        TextView tvProfile = findViewById(R.id.tvTabProfileText);
+
+        if (tvHome != null) { tvHome.setTextColor(tabIndex == 0 ? colorActive : colorInactive); tvHome.setTypeface(null, tabIndex == 0 ? Typeface.BOLD : Typeface.NORMAL); }
+        if (tvMembers != null) { tvMembers.setTextColor(tabIndex == 1 ? colorActive : colorInactive); tvMembers.setTypeface(null, tabIndex == 1 ? Typeface.BOLD : Typeface.NORMAL); }
+        if (tvExpense != null) { tvExpense.setTextColor(tabIndex == 2 ? colorActive : colorInactive); tvExpense.setTypeface(null, tabIndex == 2 ? Typeface.BOLD : Typeface.NORMAL); }
+        if (tvProfile != null) { tvProfile.setTextColor(tabIndex == 3 ? colorActive : colorInactive); tvProfile.setTypeface(null, tabIndex == 3 ? Typeface.BOLD : Typeface.NORMAL); }
+
+        if (tabIndex == 2) {
             loadExpensesData();
             calculateAndDisplayExpenses();
             calculateAndDisplayStats();
         }
     }
 
-    // --- LOGIC CHI PHÍ & THỐNG KÊ TRONG TAB ---
     private void loadExpensesData() {
         if (dbHelper != null) {
             currentExpense = dbHelper.loadExpense();
